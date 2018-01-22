@@ -17,4 +17,3 @@ OS.C++_DEFS	= -D__Mingw64_NT__   -D_XOPEN_SOURCE -D_BSD_SOURCE
 
 DESTDIR		= /
 
-+vars:   $(.VARIABLES:%=+var[%])
