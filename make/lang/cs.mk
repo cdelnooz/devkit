@@ -1,22 +1,28 @@
 #
-# CS.MK --Rules for building C# libraries and programs.
+# CS.MK --Rules for building C# libraries and programs. The rules are written
+#         for the Microsoft CSC.EXE compiler. Support for buiding on Linux or BSD with mono
+#         has not yet been implemented.
 #
 # Contents:
 # build:   --Build all the c# sources that have changed.
 # install: --install c# binaries and libraries.
 # clean:   --Remove c# class files.
 # src:     --Update the CS_SRC macro.
-# tags:    --Build vi, emacs tags files.
 # todo:    --Report "unfinished work" comments in CSC files.
 #
 #
 .PHONY: $(recursive-targets:%=%-cs)
 
 CS_SUFFIX ?= cs
+
+# TODO: these are essentially specific to the windows platform and should probably go to
+#       one of the os/*.mk
 LIB_SUFFIX ?= dll
 EXE_SUFFIX ?= exe
 
-CS_MAIN_RGX ?= '^[ \t]*static[ \t]*void[ \t]'
+# this regex searches for the main-function in C#, which normally is:
+# static void Main
+CS_MAIN_RGX ?= '^[ \t]*static[ \t]*void[ \t]Main'
 
 ifdef autosrc
     LOCAL_CS_SRC := $(shell find . -path ./obj -prune -o -type f -name '*.$(CS_SUFFIX)' -print)
@@ -27,16 +33,20 @@ endif
 
 # these rules assume that the C# code is organised as follows:
 #  - the assembly or program name is the same as the directory name where the Makefile resides
-#  - the cs source files are at the same level or in subdirectories (i.e. no submodules)
-#  - if this builds an executable, the main file resides in the same directory as the Makefile
+#  - the cs source files are at the same level or in subdirectories; these subdirs have no further
+#    Makefile recursion!
+#  - if this builds an executable, the main file resides in the same directory as the Makefile and
+#    has the 'static void Main' function
 # when organised this way, these rules autodetect whether to build a library or executable and
 # what name to give it. The name can be overridden in the local Makefile.
 MODULE_NAME ?= $(shell basename $$(pwd))
 
 ifdef CS_MAIN_SRC
+  # Main file detected, so we are building an executable
     TARGET := $(MODULE_NAME).$(EXE_SUFFIX)
     TARGET.CS_FLAGS += -target:winexe
 else
+  # no main file, so we assume we're building a library
     TARGET := $(MODULE_NAME).$(LIB_SUFFIX)
     TARGET.CS_FLAGS += -target:library
 endif
@@ -62,7 +72,7 @@ $(archdir)/$(TARGET): $(CS_SRC) | $(archdir)
 	$(CSC) $(ALL_CS_FLAGS) $^ "-out:$@"
 
 #
-# install: --install cs binaries and libraries.
+# TODO: install: --install cs binaries and libraries.
 #
 install-cs:	
 	$(ECHO_TARGET)
@@ -82,6 +92,8 @@ clean-cs:
 #
 # src: --Update the CS_SRC macro.
 #      exclude ./obj from the search path, Visual Studio sometimes generates files here.
+#      other than that, all .cs files in the directory tree from here are condidered part of
+#      this module.
 #
 src:	src-cs
 src-cs:
