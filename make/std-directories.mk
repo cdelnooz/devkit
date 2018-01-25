@@ -27,8 +27,8 @@ system_root	= $(DESTDIR)
 #
 system_confdir	= $(abspath $(system_root)/etc/$(subdir))
 export pkgver	= $(abspath $(PACKAGE)$(VERSION:%=-%))
-
-export archdir	= $(VARIANT:%=%-)$(OS:%=%-)$(ARCH)
+archdir         ?= $(VARIANT:%=%-)$(OS:%=%-)$(ARCH)
+export archdir
 export gendir	= $(archdir)/gen
 rootdir	 	= $(abspath $(DESTDIR)/$(prefix))
 rootdir_opt 	= $(abspath $(DESTDIR)/$(prefix)/$(opt))
