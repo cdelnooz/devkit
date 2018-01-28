@@ -63,19 +63,22 @@ ALL_CS_FLAGS = $(VARIANT.CS_FLAGS) $(OS.CS_FLAGS) $(ARCH.CS_FLAGS) $(LOCAL.CS_FL
 # All assemblies that are references need to be passed to the compiler; for the moment
 # these rules assume references are given by full path! This because of the variety
 # of .Net Framework versions that exist and can be used in mixed fashion.
-# the directories can be overridden by the project specific file
-# the local makefiles should define framework_<version>_lib with all the dll files 
-# the assembly needs from the specific framework version. Note: if all assemblies require the
-# same framework, the project mk-file could globally set this.
-# In addition, local files can set LOCAL.CS_REFS for non-system references
-framework_root ?= '/c/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/'
-framework_3.5 ?= $(framework_root)v3.5/
-framework_4.5 ?= $(framework_root)v4.5/
-framework_4.5.1 ?=$(framework_root)v4.5.1/
-
-TARGET.CS_REFS = $(framework_3.5_lib:%=-reference:$(framework_3.5)%.$(LIB_SUFFIX)) \
-  $(framework_4.5_lib:%=-reference:$(framework_4.5)%.$(LIB_SUFFIX)) \
-  $(framework_4.5.1_lib:%=-reference:$(framework_4.5.1)%.$(LIB_SUFFIX))
+# How to use:
+# similar to languages, specify dotnet_frameworks. The names for each framework can be
+# freely chosen. For example:
+# dotnet_frameworks = v2_0 v3_5 v4_5_1
+# then for each of the specified frameworks, you need to specify the directory where the
+# frameworks reside as <framework_name>.dir. This can easily be done in the project.mk
+# makefile as the locations would be static across the project. For the example above, the
+# project make could have:
+# v2_0.dir = /c/Windows/Framework/2.0.5057
+# v3_5.dir = /c/Program Files (x86)/Reference Assemblies/Microsoft/Framework/v3.5
+# and so forth.
+# then lastly, at the module level, one would define a variable <framework_name>.ref with
+# all references to use from that framework (without the extension). E.g.
+# v2_0.ref = mscorlib System System.Data
+# in addition, projects can add references to the LOCAL.CS_REFS flag
+TARGET.CS_REFS = $(foreach f,$(dotnet_frameworks),$($(f).ref:%=-reference:$($(f).dir)%.$(LIB_SUFFIX)))
 
 ALL_CS_REFS = $(VARIANT.CS_REFS) $(OS.CS_REFS) $(ARCH.CS_REFS) $(LOCAL.CS_REFS) \
     $(TARGET.CS_REFS) $(PROJECT.CS_REFS) $(CS_REFS)
