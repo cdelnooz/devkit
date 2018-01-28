@@ -55,6 +55,11 @@ ifdef KEY_FILE
   TARGET.CS_FLAGS += -keyfile:$(KEY_FILE)
 endif
 
+ifdef APP_CONFIG
+	TARGET.CS_FLAGS += -appconfig:$(APP_CONFIG)
+	TARGET.CONFIG = $(archdir)/$(TARGET).config
+endif
+
 CSC ?= $(CS_BINDIR)csc.exe
 
 ALL_CS_FLAGS = $(VARIANT.CS_FLAGS) $(OS.CS_FLAGS) $(ARCH.CS_FLAGS) $(LOCAL.CS_FLAGS) \
@@ -77,8 +82,19 @@ ALL_CS_FLAGS = $(VARIANT.CS_FLAGS) $(OS.CS_FLAGS) $(ARCH.CS_FLAGS) $(LOCAL.CS_FL
 # then lastly, at the module level, one would define a variable <framework_name>.ref with
 # all references to use from that framework (without the extension). E.g.
 # v2_0.ref = mscorlib System System.Data
-# in addition, projects can add references to the LOCAL.CS_REFS flag
 TARGET.CS_REFS = $(foreach f,$(dotnet_frameworks),$($(f).ref:%=-reference:$($(f).dir)%.$(LIB_SUFFIX)))
+
+# besides the the system libs, which are just referenced, the local makefile can specify local.ref
+# which has librarires that will be copied to the local archdir (mimic the Visual Studio "copy local")
+# lastly, for local refs that do not need copying, a -reference can be added to LOCAL.CS_FLAGS directly
+# TODO: filenames with spaces don't work with below expansion; work around: use the DOS name
+LOCAL.CS_REFS += $(local.ref:%=-reference:%.$(LIB_SUFFIX))
+
+# create build rules for local references
+define copy_local
+$(patsubst %, $(archdir)/%.$(LIB_SUFFIX), $(notdir $(1))): $(1).$(2)
+		$$(INSTALL_DATA)  $$? $$@
+endef
 
 ALL_CS_REFS = $(VARIANT.CS_REFS) $(OS.CS_REFS) $(ARCH.CS_REFS) $(LOCAL.CS_REFS) \
     $(TARGET.CS_REFS) $(PROJECT.CS_REFS) $(CS_REFS)
@@ -86,12 +102,18 @@ ALL_CS_REFS = $(VARIANT.CS_REFS) $(OS.CS_REFS) $(ARCH.CS_REFS) $(LOCAL.CS_REFS) 
 #
 # build: --Build all the cs sources that have changed.
 #
-build:		build-cs
+build:		build-cs $(TARGET.CONFIG) $(foreach ref,$(local.ref),$(archdir)/$(notdir $(ref).$(LIB_SUFFIX)))
 build-cs: $(archdir)/$(TARGET)
+
+
+$(foreach ref,$(local.ref),$(eval $(call copy_local,$(ref),$(LIB_SUFFIX))))
 
 $(archdir)/$(TARGET): $(CS_SRC) | $(archdir)
 	$(ECHO_TARGET)
 	$(CSC) $(ALL_CS_FLAGS) $(ALL_CS_REFS) $^ "-out:$@"
+
+$(TARGET.CONFIG): $(APP_CONFIG)
+	$(INSTALL_DATA) $? $@
 
 #
 # TODO: install: --install cs binaries and libraries.
@@ -109,7 +131,7 @@ distclean:	clean-cs
 clean:	clean-cs
 clean-cs:
 	$(ECHO_TARGET)
-	$(RM) $(archdir)/$(TARGET)
+	$(RM) $(archdir)/*
 
 #
 # src: --Update the CS_SRC macro.
