@@ -26,7 +26,7 @@ CS_MAIN_RGX ?= '^[ \t]*static[ \t]*void[ \t]Main'
 
 ifdef autosrc
     LOCAL_CS_SRC := $(shell find . -path ./obj -prune -o -type f -name '*.$(CS_SUFFIX)' -print)
-    LOCAL_CS_MAIN := $(shell grep -l $(CS_MAIN_RGX) '*.$(CS_SUFFIX)') 
+    LOCAL_CS_MAIN := $(shell grep -l $(CS_MAIN_RGX) '*.$(CS_SUFFIX)')
     CS_SRC ?= $(LOCAL_CS_SRC)
     CS_MAIN_SRC ?= $(LOCAL_CS_MAIN)
 endif
@@ -92,8 +92,17 @@ LOCAL.CS_REFS += $(local.ref:%=-reference:%.$(LIB_SUFFIX))
 
 # create build rules for local references
 define copy_local
-$(patsubst %, $(archdir)/%.$(LIB_SUFFIX), $(notdir $(1))): $(1).$(2)
-		$$(INSTALL_DATA)  $$? $$@
+$(patsubst %, $(archdir)/%.$(LIB_SUFFIX), $(notdir $(1))): $(1).$(LIB_SUFFIX)
+		$$(INSTALL_DATA) $$? $$@
+# if this reference has a .pdb file with debug symbols, also copy it
+		$$(if $$(wildcard $$(?:%.$(LIB_SUFFIX)=%.pdb)), \
+			$$(INSTALL_DATA) $$(?:%.$(LIB_SUFFIX)=%.pdb) $$(@:%.$(LIB_SUFFIX)=%.pdb))
+# if this reference has a .config app config file, also copy it
+		$$(if $$(wildcard $$(?:%=%.config)), \
+			$$(INSTALL_DATA) $$(?:%=%.config) $$(@:%=%.config))
+# if this reference has an associated xml file, also copy it
+		$$(if $$(wildcard $$(?:%.$(LIB_SUFFIX)=%.xml)), \
+			$$(INSTALL_DATA) $$(?:%.$(LIB_SUFFIX)=%.xml) $$(@:%.$(LIB_SUFFIX)=%.xml))
 endef
 
 ALL_CS_REFS = $(VARIANT.CS_REFS) $(OS.CS_REFS) $(ARCH.CS_REFS) $(LOCAL.CS_REFS) \
@@ -106,7 +115,7 @@ build:		build-cs $(TARGET.CONFIG) $(foreach ref,$(local.ref),$(archdir)/$(notdir
 build-cs: $(archdir)/$(TARGET)
 
 
-$(foreach ref,$(local.ref),$(eval $(call copy_local,$(ref),$(LIB_SUFFIX))))
+$(foreach ref,$(local.ref),$(eval $(call copy_local,$(ref))))
 
 $(archdir)/$(TARGET): $(CS_SRC) | $(archdir)
 	$(ECHO_TARGET)
@@ -118,7 +127,7 @@ $(TARGET.CONFIG): $(APP_CONFIG)
 #
 # TODO: install: --install cs binaries and libraries.
 #
-install-cs:	
+install-cs:
 	$(ECHO_TARGET)
 
 uninstall-cs:
