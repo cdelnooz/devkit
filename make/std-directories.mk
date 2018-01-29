@@ -29,7 +29,8 @@ system_confdir	= $(abspath $(system_root)/etc/$(subdir))
 export pkgver	= $(abspath $(PACKAGE)$(VERSION:%=-%))
 archdir         ?= $(VARIANT:%=%-)$(OS:%=%-)$(ARCH)
 export archdir
-export gendir	= $(archdir)/gen
+gendir	?= $(archdir)/gen
+export gendir
 rootdir	 	= $(abspath $(DESTDIR)/$(prefix))
 rootdir_opt 	= $(abspath $(DESTDIR)/$(prefix)/$(opt))
 #exec_prefix = $(abspath $(rootdir)/$(archdir)	# (GNU std))
