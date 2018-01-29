@@ -55,21 +55,26 @@ else
     TARGET.CS_FLAGS += -target:library
 endif
 
+# keyfile specified, include it in build
 ifdef KEY_FILE
   TARGET.CS_FLAGS += -keyfile:$(KEY_FILE)
 endif
 
+# application config file specified, include it in build
 ifdef APP_CONFIG
 	TARGET.CS_FLAGS += -appconfig:$(APP_CONFIG)
 	TARGET.CONFIG = $(archdir)/$(TARGET).config
 endif
 
+# compiler
 CSC ?= $(CS_BINDIR)csc.exe
+# resources generator
 RESGEN ?= $(RESGEN_BINDIR)resgen.exe
 
+# collect all compiler flags
 ALL_CS_FLAGS = $(VARIANT.CS_FLAGS) $(OS.CS_FLAGS) $(ARCH.CS_FLAGS) $(LOCAL.CS_FLAGS) \
     $(TARGET.CS_FLAGS) $(PROJECT.CS_FLAGS) $(CS_FLAGS)
-
+# collect all resources generator flags
 ALL_RSX_FLAGS = $(VARIANT.RSX_FLAGS) $(OS.RSX_FLAGS) $(ARCH.RSX_FLAGS) $(LOCAL.RSX_FLAGS) \
     $(TARGET.RSX_FLAGS) $(PROJECT.RSX_FLAGS) $(RSX_FLAGS)
 # All assemblies that are references need to be passed to the compiler; Because of the variety
@@ -83,10 +88,11 @@ ALL_RSX_FLAGS = $(VARIANT.RSX_FLAGS) $(OS.RSX_FLAGS) $(ARCH.RSX_FLAGS) $(LOCAL.R
 # frameworks reside as <framework_name>.dir. This can easily be done in the project.mk
 # makefile as the locations would be static across the project. For the example above, the
 # project make could have:
-# v2_0.dir = /c/Windows/Framework/2.0.5057
-# v3_5.dir = /c/Program Files (x86)/Reference Assemblies/Microsoft/Framework/v3.5
+# v2_0.dir = /c/Windows/Framework/2.0.5057/
+# v3_5.dir = /c/Program Files (x86)/Reference Assemblies/Microsoft/Framework/v3.5/
 # and so forth.
-# then lastly, at the module level, one would define a variable <framework_name>.ref with
+# NOTE: make sure to have the trailing '/'
+# Lastly, at the module level, one would define a variable <framework_name>.ref with
 # all references to use from that framework (without the extension). E.g.
 # v2_0.ref = mscorlib System System.Data
 TARGET.CS_REFS = $(foreach f,$(dotnet_frameworks),$($(f).ref:%=-r:$($(f).dir)%.$(LIB_SUFFIX)))
@@ -124,8 +130,8 @@ RESOURCES = $(addprefix $(gendir)/,$(notdir $(RSX_SRC:%.$(RSX_SUFFIX)=%.resource
 #
 # build: --Build all the cs sources that have changed.
 #
-build:		build-cs $(TARGET.CONFIG) $(foreach ref,$(local.ref),$(archdir)/$(notdir $(ref).$(LIB_SUFFIX)))
-build-cs: $(archdir)/$(TARGET)
+build:		build-cs
+build-cs: $(archdir)/$(TARGET) $(TARGET.CONFIG) $(foreach ref,$(local.ref),$(archdir)/$(notdir $(ref).$(LIB_SUFFIX)))
 
 # for each of the local references, generate the build rules for copy-local behaviour
 $(foreach ref,$(local.ref),$(eval $(call copy_local,$(ref))))
@@ -134,12 +140,13 @@ $(archdir)/$(TARGET): $(CS_SRC) $(RESOURCES)| $(archdir)
 	$(ECHO_TARGET)
 	$(CSC) $(ALL_CS_FLAGS) $(ALL_CS_REFS) $(RESOURCES:%=-res:%) $(CS_SRC) "-out:$@"
 
+# install the application config file if it was specified.
 $(TARGET.CONFIG): $(APP_CONFIG)
 	$(INSTALL_DATA) $? $@
 
 # build the resources files
 $(foreach d, $(RSX_SRC), $(eval $(call make-deps-resx,$d)))
-# note: resgen.exe doesn't accept -compile (yay, consistency Microsoft!) so
+# NOTE: resgen.exe doesn't accept -compile (yay, consistency Microsoft!) so
 # we have to pass /compile. Msys by default will convert that to c:\msys64\compile.
 # to avoid that, we  need to set the MSYS_ARG_CONV_EXCL environment variable to include
 # /compile. This can be done in the project mk-file.
