@@ -58,20 +58,9 @@ else
     TARGET.CS_FLAGS += -target:library
 endif
 
-# keyfile specified, include it in build
-ifdef KEY_FILE
-  TARGET.CS_FLAGS += -keyfile:$(KEY_FILE)
-endif
-
-# application config file specified, include it in build
+# application config file specified, so create one in archdir
 ifdef APP_CONFIG
-	TARGET.CS_FLAGS += -appconfig:$(APP_CONFIG)
 	TARGET.CONFIG = $(archdir)/$(TARGET).config
-endif
-
-# if an icon file was given, we include it in the binary
-ifdef ICON_FILE
-	TARGET.CS_FLAGS += -win32icon:$(ICON_FILE)
 endif
 
 # compiler
@@ -148,14 +137,18 @@ CS_SRC += $(PROTO_SRC:%=%.cs)
 # build: --Build all the cs sources that have changed.
 #
 build:		build-cs
-build-cs: $(archdir)/$(TARGET) $(TARGET.CONFIG) $(foreach ref,$(local.ref),$(archdir)/$(notdir $(ref).$(LIB_SUFFIX)))
+build-cs: $(archdir)/$(TARGET) $(TARGET.CONFIG) \
+	$(foreach ref,$(local.ref),$(archdir)/$(notdir $(ref).$(LIB_SUFFIX)))
 
 # for each of the local references, generate the build rules for copy-local behaviour
 $(foreach ref,$(local.ref),$(eval $(call copy_local,$(ref))))
-
-$(archdir)/$(TARGET): $(CS_SRC) $(RESOURCES)| $(archdir)
+# somewhat ugly, but there is only a single invocation that needs to get all files
+$(archdir)/$(TARGET): $(CS_SRC) $(RESOURCES) $(MANIFEST_FILE) $(KEY_FILE) \
+		$(ICON_FILE) $(APP_CONFIG) | $(archdir)
 	$(ECHO_TARGET)
-	$(CSC) $(ALL_CS_FLAGS) $(ALL_CS_REFS) $(RESOURCES:%=-res:%) $(CS_SRC) "-out:$@"
+	$(CSC) $(ALL_CS_FLAGS) $(MANIFEST_FILE:%=-win32manifest:%) $(ALL_CS_REFS) \
+		$(RESOURCES:%=-res:%) $(KEY_FILE:%=-keyfile:%) $(ICON_FILE:%=-win32icon:%) \
+		$(APP_CONFIG:%=-appconfig:%) $(CS_SRC) "-out:$@"
 
 # install the application config file if it was specified.
 $(TARGET.CONFIG): $(APP_CONFIG)
