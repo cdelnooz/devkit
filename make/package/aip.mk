@@ -6,38 +6,44 @@
 # NOTE: as we are using msys on windows, add /NewProject;/Execute;/Build to the
 #       MSYS_ARG_CONV_EXCL list in the project makefile and/or environment.
 #
-# The builder expects a $(PACKAGE).aip file present to which it will add all files
-# in $(archdir) and set version, product name and files to be packaged.
+# The builder expects a $(PACKAGE).aip file present which it will use to create a full
+# aip-file in $(gendir)
 
 AIC ?= AdvancedInstaller.com
 
 package: $(PACKAGE_DIR)/$(PACKAGE).exe
 
-
-# building an exe file, the local makefile needs to give all files to be packaged as
+# building an aip file, the local makefile needs to give all files to be packaged as
 # prerequisites. Currently, this is assumed a flat structure in APPDIR. In addition,
 # the first prerequisite must be the .aip file.
 # TODO: add support for directory structure.
-$(PACKAGE_DIR)/%.exe: %.aip
+%.aip: %.aip.in
 	$(ECHO_TARGET)
-	$(file > $<.in,;aic)
-	$(file >>$<.in,SetProperty ProductName=$(PRODUCT_NAME))
-	$(file >>$<.in,SetProperty Manufacturer=$(MANUFACTURER))
-	$(file >>$<.in,SetVersion $(VERSION))
-	$(file >>$<.in,$(PRODUCT_ICON:%=SetIcon -icon %))
-	$(file >>$<.in,SetPackageName $(PACKAGE))
-	$(file >>$<.in,SetOutputLocation -buildname DefaultBuild -path $(shell cygpath -aw $(PACKAGE_DIR)))
-	$(foreach f,$(filter-out $<,$^),$(file >>$<.in,AddFile APPDIR $(subst /,\,$f)))
-	$(file >>$<.in,Build)
-	$(AIC) /Execute $(subst /,\,$<) $(subst /,\,$<.in)
-	@$(RM) $<.in
+	$(file > $@.args,;aic)
+	$(file >>$@.args,SetProperty ProductName=$(PRODUCT_NAME))
+	$(file >>$@.args,SetProperty Manufacturer=$(MANUFACTURER))
+	$(file >>$@.args,SetVersion $(VERSION))
+	$(file >>$@.args,$(PRODUCT_ICON:%=SetIcon -icon %))
+	$(file >>$@.args,SetPackageName $(PACKAGE))
+	$(file >>$@.args,SetOutputLocation -buildname DefaultBuild -path $(shell cygpath -aw $(PACKAGE_DIR)))
+	$(foreach f,$(filter-out $<,$^),$(file >>$@.args,AddFile APPDIR $(subst /,\,$f)))
+	$(file >>$@.args,$(PRODUCT_MAIN:%=NewShortcut -name % -dir SHORTCUTDIR ) $(PRODUCT_MAIN:%=-target APPDIR\\%.exe -wkdir APPDIR))
+	$(file >>$@.args,$(PRODUCT_MAIN:%=NewShortcut -name % -dir DesktopDir ) $(PRODUCT_MAIN:%=-target APPDIR\\%.exe -wkdir APPDIR))
+	$(file >>$@.args,Save)
+	@$(CP) $< $@
+	$(AIC) /Execute $(subst /,\,$@) $(subst /,\,$@.args)
+	@$(RM) $@.args
+
+# build the aip file into an executable.
+$(PACKAGE_DIR)/%.exe: %.aip
+	$(AIC) /Build $(subst /,\,$<)
 
 
 clean: clean-aip
 distclean: distclean-aip
 
 clean-aip:
-	$(RM) $(PACKAGE_DIR)/$(PACKAGE).exe
+	$(RM) $(PACKAGE_DIR)/$(PACKAGE).exe *.aip
 
 distclean-aip: clean-aip
 	$(RM) -r $(PACKAGE_DIR) $(PACKAGE)-cache
