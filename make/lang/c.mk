@@ -46,6 +46,7 @@ ifdef autosrc
     C_LIB_SRC ?= $(LOCAL_C_LIB_SRC)
 endif
 
+# C_LIB_SRC: all the "doesn't contain main()" files...
 C_LIB_SRC := $(filter-out $(C_MAIN_SRC),$(C_SRC))
 
 #
@@ -101,7 +102,7 @@ c-src-defined:
 # This target also builds dependency information as a side effect
 # of the build.  Note that it doesn't declare that it builds the
 # dependencies, and the "-include" command allows the files to
-# be absent, so this setup will avoid premature compilation.
+# be absent, to avoid premature compilation.
 #
 $(archdir)/%.$(o): %.c | $(archdir)
 	$(ECHO_TARGET)
@@ -167,6 +168,14 @@ $(includedir)/%.h:	$(gendir)/%.h
 build:	build-c
 build-c:	$(C_MAIN)
 	$(ECHO_TARGET)
+
+#
+# build any subdirectories before trying to compile stuff;
+# library subdirectories may install include files needed
+# for compilation.
+#
+$(C_OBJ) $(C_MAIN_OBJ) $(C_MAIN):	| build-subdirs
+$(C_PIC_OBJ) $(C_MAIN_PIC_OBJ):	| build-subdirs
 
 #
 # build[%]: --Build a C file's related object.

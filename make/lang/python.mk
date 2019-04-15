@@ -22,6 +22,9 @@ ifdef autosrc
     PY_SRC ?= $(LOCAL_PY_SRC)
 endif
 
+PY_LINT ?= pycodestyle
+PY_TIDY ?= autopep8
+
 #
 # %.py:		--Rules for installing python scripts
 #
@@ -44,7 +47,8 @@ install-python: $(PY_SRC:%.py=$(bindir)/%)
 uninstall-python:
 	$(ECHO_TARGET)
 	$(RM) $(PY_SRC:%.py=$(bindir)/%)
-	$(RMDIR) -p $(bindir) 2>/dev/null || true
+	$(RM) $(PY_SRC:%.py=$(bindir)/__pycache__/%.pyc)
+	$(RMDIR) -p $(bindir)/__pycache__ $(bindir) 2>/dev/null || true
 
 #
 # install-python-lib: --Install python as library modules.
@@ -56,7 +60,8 @@ install-python-lib: $(PY_SRC:%.py=$(pythonlibdir)/%.py)
 uninstall-python-lib:
 	$(ECHO_TARGET)
 	$(RM) $(PY_SRC:%.py=$(pythonlibdir)/%.py)
-	$(RMDIR) -p $(pythonlibdir) 2>/dev/null || true
+	$(RM) $(PY_SRC:%.py=$(pythonlibdir)/__pycache__/%.pyc)
+	$(RMDIR) -p $(pythonlibdir)/__pycache__ $(pythonlibdir) 2>/dev/null || true
 
 #
 # clean: --Remove python executables.
@@ -103,19 +108,19 @@ todo-python:
 # REVISIT: make this more customisable...
 #
 lint:	lint-python
-lint-python:	| cmd-exists[pep8] var-defined[PY_SRC]
+lint-python:	| cmd-exists[$(PY_LINT)] var-defined[PY_SRC]
 	$(ECHO_TARGET)
-	-pep8 --max-line-length=110 --ignore=E402,E721 $(PY_SRC)
+	-$(PY_LINT) --max-line-length=110 --ignore=E402,E721 $(PY_SRC)
 
-lint[%.py]:	| cmd-exists[pep8] var-defined[PY_SRC]
+lint[%.py]:	| cmd-exists[$(PY_LINT)] var-defined[PY_SRC]
 	$(ECHO_TARGET)
-	-pep8 --max-line-length=110 --ignore=E402,E721 $*.py
+	-$(PY_LINT) --max-line-length=110 --ignore=E402,E721 $*.py
 
 tidy:	tidy-python
-tidy-python: 	| cmd-exists[autopep8] var-defined[PY_SRC]
+tidy-python: 	| cmd-exists[$(PY_TIDY)] var-defined[PY_SRC]
 	$(ECHO_TARGET)
-	autopep8 --in-place --max-line-length=110 --ignore=E402,E721 $(PY_SRC)
+	$(PY_TIDY) --in-place --max-line-length=110 --ignore=E402,E721 $(PY_SRC)
 
-tidy[%.py]:	| cmd-exists[autopep8]
+tidy[%.py]:	| cmd-exists[$(PY_TIDY)]
 	$(ECHO_TARGET)
-	autopep8 --in-place --max-line-length=110 --ignore=E402,E721 $*.py
+	$(PY_TIDY) --in-place --max-line-length=110 --ignore=E402,E721 $*.py
