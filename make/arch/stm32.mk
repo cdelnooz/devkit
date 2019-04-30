@@ -1,19 +1,21 @@
 #
 # STM32.MK --Macros and definitions for ARM/STM32 architectures
 #
-CC = /c/Keil/ARM/ARMCC/bin/armcc.exe
-CXX = /c/Keil/ARM/ARMCC/bin/armcc.exe
-AR = /c/Keil/ARM/ARMCC/bin/armar.exe
-LD = /c/Keil/ARM/ARMCC/bin/armlink.exe
-ARFLAGS = -x$(AR)
 
-ARMCC_FLAGS = --cpu=Cortex-M3 --diag-style=ide \
+CC = $(KEILBIN)armcc.exe
+CXX = $(KEILBIN)armcc.exe
+AR = $(KEILBIN)armar.exe
+LD = $(KEILBIN)armlink.exe
+# -d to ensure the commands get prepended with -
+ARFLAGS = -d rc
+
+ARMCC_FLAGS = --cpu Cortex-M3 --diag-style=ide \
     --diag_remark=450,667 -g -O0 -Ospace \
     --signed_chars --no_rtti --no_exceptions \
     --diag_error=warning \
     --list --asm --interleave \
     --asm_dir=$(archdir) --list_dir=$(archdir) \
-    -I/c/Keil/ARM/RV31/INC
+    -I$(KEILRV)INC
 
 ARCH.CXXFLAGS = -c --cpp $(ARMCC_FLAGS)
 ARCH.CFLAGS = -c $(ARMCC_FLAGS)

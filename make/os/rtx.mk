@@ -2,7 +2,7 @@
 # RTX.MK --Settings for Keil/RTX
 #
 LIB_PREFIX =
-LIB_SUFFIX = lib
+a = lib
 
 include os/posix.mk
 
