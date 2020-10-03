@@ -1,10 +1,10 @@
 #
-# Makefile --Build rules for the variant directory of devkit.
+# Makefile --Build rules for the variant directory of makeshift.
 #
 MK_SRC = default.mk
 subdir	= variant
 
-include devkit.mk
+include makeshift.mk
 
 install:	install-mk
 uninstall:	uninstall-mk
