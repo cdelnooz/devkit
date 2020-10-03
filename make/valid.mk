@@ -1,5 +1,5 @@
 #
-# VALID.MK --devkit/file-state validation targets.
+# VALID.MK --makeshift/file-state validation targets.
 #
 # Contents:
 # var-defined[%]:     --Test that a variable is defined.
@@ -9,19 +9,20 @@
 # file-exists[%]:     --Test if a file exists.
 # dir-exists[%]:      --Test if a directory exists.
 # cmd-exists[%]:      --Test if a command exists.
+# cmd-version[%]      --Print a command's version information.
 # mkdir[%]:           --Create a directory.
 # sleep[%]:           --Sleep for the specified time.
 #
 # Remarks:
 # The "valid" module is a library of validation tests in the form of
-# make targets.  These are used by various pattern rules in the devkit
+# make targets.  These are used by various pattern rules in the makeshift
 # build system.
 #
 # Example: the following definition will fail if the macro $(INPUT_FILES)
 # is not defined, or if there is no command *my-frobnicate*:
 #
 # ```
-# my-target: | var-defined[INPUT_FILES] cmd-exists[frobnicate]
+# my-target: | var-defined[INPUT_FILES] | cmd-exists[frobnicate]
 #         frobnicate $(INPUT_FILES) > $@
 # ```
 #
@@ -50,7 +51,7 @@ var-defined[%]:
 src-var-defined[%]:
 	@if [ -z '$(value $*)' ]; then \
 	    printf $(VAR_UNDEF) "$*"; \
-	    echo 'run "make src" to define it'; \
+	    echo 'run "make src" to define it.'; \
 	    false; \
 	fi >&2
 #
@@ -59,7 +60,7 @@ src-var-defined[%]:
 var-absolute-path[%]:
 	@case '$(value $*)' in \
 	/*);; \
-	*)  echo 'Error: \"$*\" ("$(value $*)") is not an absolute path'; \
+	*)  echo 'Error: \"$*\" ("$(value $*)") is not an absolute path.'; \
 	    false; \
 	esac
 
@@ -68,7 +69,7 @@ var-absolute-path[%]:
 #
 file-writable[%]:
 	@if [ ! -w "$*" ]; then \
-	    echo "Error: \"$*\" is not writable"; \
+	    echo "Error: \"$*\" is not writable."; \
 	    false; \
 	fi
 
@@ -77,7 +78,7 @@ file-writable[%]:
 #
 file-exists[%]:
 	@if [ ! -f "$*" ]; then \
-	    echo "Error: file \"$*\" does not exist"; \
+	    echo "Error: file \"$*\" does not exist."; \
 	    false; \
 	fi
 
@@ -86,7 +87,7 @@ file-exists[%]:
 #
 dir-exists[%]:
 	@if [ ! -d "$*" ]; then \
-	    echo "Error: directory \"$*\" does not exist"; \
+	    echo "Error: directory \"$*\" does not exist."; \
 	    false; \
 	fi
 
@@ -95,9 +96,29 @@ dir-exists[%]:
 #
 cmd-exists[%]:
 	@if  ! type "$*" >/dev/null 2>&1; then \
-	    echo "Error: command \"$*\" does not exist"; \
+	    echo "Error: the command \"$*\" is not installed."; \
 	    false; \
 	fi
+
+#
+# cmd-version[%] --Print a command's version information.
+#
+# Remarks:
+# Commands have a variety of ways and formats for printing their
+# version.  This uses dirty delegation(!?) by expanding a macro named
+# via the pattern that matched to provide custom behaviour.  The macro
+# outputs the version information to stdout; only the first line is
+# printed, any other output to stdout, stderr is filtered out.
+#
+cmd-version[%]:
+	@printf '%s:\n\t' "$*"
+	@if cmd=$$(which "$*"); then \
+	    eval "$(PRINT_$*_VERSION)" | head -n1; \
+	    printf '\t%s\n' "$$cmd"; \
+	else \
+	    printf '%s\n' "not installed"; \
+	    false; \
+	fi 2>/dev/null
 
 #
 # mkdir[%]: --Create a directory.

@@ -53,7 +53,7 @@ install-perl:	$(PL_SRC:%.pl=$(bindir)/%) $(PM_SRC:%.pm=$(perllibdir)/%.pm)
 uninstall-perl:	$(PL_SRC:%.pl=$(bindir)/%) $(PM_SRC:%.pm=$(perllibdir)/%.pm)
 	$(ECHO_TARGET)
 	$(RM) $(PL_SRC:%.pl=$(bindir)/%) $(PM_SRC:%.pm=$(perllibdir)/%.pm)
-	$(RMDIR) -p $(bindir) $(perllibdir) 2>/dev/null || true
+	$(RMDIR) -p $(bindir) $(perllibdir) 2>/dev/null ||:
 
 #
 # xgettext support
@@ -74,7 +74,7 @@ clean-perl:
 tidy:	tidy-perl
 tidy-perl:
 	$(ECHO_TARGET)
-	perltidy --profile=$(DEVKIT_HOME)/etc/.perltidyrc $(PERL_SRC)
+	perltidy --profile=$(MAKESHIFT_HOME)/etc/.perltidyrc $(PERL_SRC)
 
 #
 # toc: --Build the table-of-contents for perl files.
@@ -90,9 +90,9 @@ toc-perl:
 src:	src-perl
 src-perl:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn PL_SRC *.pl
-	@mk-filelist -f $(MAKEFILE) -qn PM_SRC *.pm
-	@mk-filelist -f $(MAKEFILE) -qn T_SRC *.t
+	$(Q)mk-filelist -f $(MAKEFILE) -qn PL_SRC *.pl
+	$(Q)mk-filelist -f $(MAKEFILE) -qn PM_SRC *.pm
+	$(Q)mk-filelist -f $(MAKEFILE) -qn T_SRC *.t
 
 #
 # todo: --Report unfinished work (identified by keyword comments)
@@ -100,7 +100,7 @@ src-perl:
 todo:	todo-perl
 todo-perl:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(PERL_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(PERL_SRC) /dev/null ||:
 
 #
 # *.pot --extract strings for internationalisation.

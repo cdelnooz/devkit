@@ -1,9 +1,9 @@
 #
-# GOOGLETEST.MK --Rules for building and running tests with googletest.
+# GOOGLE.MK --Rules for building and running tests with googletest.
 #
 # Remarks:
 # The googletest rules assume that you're developing C++ code, and
-# make reference to make variables defined in the lang/c++ module.
+# make reference to `make` variables defined in the lang/c++ module.
 #
 GTEST_LIBS = gtest_main gtest dl util
 TEST_XML ?= google-tests.xml
@@ -25,7 +25,7 @@ $(TEST_EXE):	$(C++_OBJ) $(GTEST_LIBS:%=-l%)
 test:	test-google
 .PHONY:	test-google
 test-google:	$(TEST_EXE)
-	@$(ECHO_TARGET)
+	$(ECHO_TARGET)
 	$(TEST_EXE) $(ALL_GTEST_FLAGS) --gtest_output=xml:$(TEST_XML)
 
 clean:	clean-googletest

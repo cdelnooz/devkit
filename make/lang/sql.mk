@@ -30,7 +30,7 @@ install-sql:    $(SQL_SRC:%=$(sqllibdir)/%); $(ECHO_TARGET)
 uninstall-sql:
 	$(ECHO_TARGET)
 	$(RM) $(SQL_SRC:%=$(sqllibdir)/%)
-	$(RMDIR) -p $(sqllibdir) 2>/dev/null || true
+	$(RMDIR) -p $(sqllibdir) 2>/dev/null ||:
 
 #
 # toc: --Build the table-of-contents for SQL files.
@@ -46,7 +46,7 @@ toc-sql:
 src:	src-sql
 src-sql:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn SQL_SRC *.sql
+	$(Q)mk-filelist -f $(MAKEFILE) -qn SQL_SRC *.sql
 
 #
 # todo: --Report unfinished work in work SQL files.
@@ -54,4 +54,4 @@ src-sql:
 todo:	todo-sql
 todo-sql:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(SQL_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(SQL_SRC) /dev/null ||:

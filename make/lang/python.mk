@@ -9,12 +9,17 @@
 # src:                --define the PY_SRC variable.
 # todo:               --Report unfinished work (identified by keyword comments)
 # lint:               --Run a static analyser over the PY_SRC.
+# +version:           --Report details of tools used by python.
 #
 # See Also:
 # Exercises in Programming Style, Cristina Videira Lopes
 # https://github.com/crista/exercises-in-programming-style
 #
 .PHONY: $(recursive-targets:%=%-python)
+
+PRINT_python_VERSION = python --version
+PRINT_pycodestyle_VERSION = pycodestyle --version
+PRINT_autopep8_VERSION = autopep8 --version
 
 ifdef autosrc
     LOCAL_PY_SRC := $(wildcard *.py)
@@ -48,7 +53,7 @@ uninstall-python:
 	$(ECHO_TARGET)
 	$(RM) $(PY_SRC:%.py=$(bindir)/%)
 	$(RM) $(PY_SRC:%.py=$(bindir)/__pycache__/%.pyc)
-	$(RMDIR) -p $(bindir)/__pycache__ $(bindir) 2>/dev/null || true
+	$(RMDIR) -p $(bindir)/__pycache__ $(bindir) 2>/dev/null ||:
 
 #
 # install-python-lib: --Install python as library modules.
@@ -61,7 +66,7 @@ uninstall-python-lib:
 	$(ECHO_TARGET)
 	$(RM) $(PY_SRC:%.py=$(pythonlibdir)/%.py)
 	$(RM) $(PY_SRC:%.py=$(pythonlibdir)/__pycache__/%.pyc)
-	$(RMDIR) -p $(pythonlibdir)/__pycache__ $(pythonlibdir) 2>/dev/null || true
+	$(RMDIR) -p $(pythonlibdir)/__pycache__ $(pythonlibdir) 2>/dev/null ||:
 
 #
 # clean: --Remove python executables.
@@ -86,14 +91,14 @@ toc-python:	var-defined[PY_SRC]
 src:	src-python
 src-python:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn PY_SRC *.py
+	$(Q)mk-filelist -f $(MAKEFILE) -qn PY_SRC *.py
 #
 # todo: --Report unfinished work (identified by keyword comments)
 #
 todo:	todo-python
 todo-python:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(PY_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(PY_SRC) /dev/null ||:
 
 #
 # lint: --Run a static analyser over the PY_SRC.
@@ -124,3 +129,9 @@ tidy-python: 	| cmd-exists[$(PY_TIDY)] var-defined[PY_SRC]
 tidy[%.py]:	| cmd-exists[$(PY_TIDY)]
 	$(ECHO_TARGET)
 	$(PY_TIDY) --in-place --max-line-length=110 --ignore=E402,E721 $*.py
+
+#
+# +version: --Report details of tools used by python.
+#
++version: cmd-version[python] \
+	cmd-version[$(PY_LINT)] cmd-version[$(PY_TIDY)]

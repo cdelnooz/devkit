@@ -4,6 +4,8 @@
 # Contents:
 # %.o:         --Compile a C++ file into an arch-specific sub-directory.
 # archdir/%.o: --Compile a generated C++ file into the arch sub-directory.
+# %.s.o:       --Compile a C++ file into PIC code.
+# archdir/%.o: --Compile a generated C++ file PIC.
 # %.gcov:      --Build a text-format coverage report.
 # build:       --Compile the C++ files, and link any complete programs.
 # build[%]:    --Build a C++ file's related object.
@@ -16,15 +18,21 @@
 # src:         --Update the C++_SRC, H++_SRC, C++_MAIN_SRC macros.
 # tags:        --Build vi, emacs tags files for C++ files.
 # todo:        --Find "unfinished work" comments in C++ files.
+# +version:    --Report details of tools used by C++.
 #
 # Remarks:
 # The C++ module provides rules and targets for building software
 # using the C++ language. C++ is a little unusual in that there isn't
 # a standard file extension for the source and header files; the
-# (devkit) default is ".cc", ".h", but it can be set via the
+# (makeshift) default is ".cc", ".h", but it can be set via the
 # C++_SUFFIX and H++_SUFFIX macros.
 #
 .PHONY: $(recursive-targets:%=%-c++)
+
+PRINT_g++_VERSION = g++ --version
+PRINT_indent_VERSION = indent --version
+PRINT_uncrustify_VERSION = uncrustify --version
+PRINT_cppcheck_VERSION = cppcheck --version
 
 C++_SUFFIX ?= cc
 H++_SUFFIX ?= h
@@ -65,10 +73,14 @@ C++_CPPFLAGS = $(CPPFLAGS) \
     $(PROJECT.C++_CPPFLAGS) $(ARCH.C++_CPPFLAGS) $(OS.C++_CPPFLAGS) \
     -I. -I$(gendir) -I$(includedir)
 
+C++_SHARED_FLAGS = $(OS.C++_SHARED_FLAGS) $(ARCH.C++_SHARED_FLAGS) \
+    $(PROJECT.C++_SHARED_FLAGS) $(LOCAL.C++_SHARED_FLAGS) \
+    $(TARGET.C++_SHARED_FLAGS)
+
 C++_ALL_FLAGS = $(C++_WARN_FLAGS) $(C++_CPPFLAGS) $(C++_DEFS) $(C++_FLAGS)
 
-C++_MAIN_OBJ = $(C++_MAIN_SRC:%.$(C++_SUFFIX)=$(archdir)/%.o)
-C++_OBJ  = $(filter-out $(C++_MAIN_OBJ),$(C++_SRC:%.$(C++_SUFFIX)=$(archdir)/%.o))
+C++_MAIN_OBJ = $(C++_MAIN_SRC:%.$(C++_SUFFIX)=$(archdir)/%.$(o))
+C++_OBJ  = $(filter-out $(C++_MAIN_OBJ),$(C++_SRC:%.$(C++_SUFFIX)=$(archdir)/%.$(o)))
 
 .PRECIOUS: $(C++_MAIN_OBJ)
 C++_MAIN = $(C++_MAIN_OBJ:%.$(o)=%)
@@ -86,28 +98,44 @@ c++-src-defined:
 #
 # %.o: --Compile a C++ file into an arch-specific sub-directory.
 #
-$(archdir)/%.o: %.$(C++_SUFFIX) | $(archdir)
+$(archdir)/%.$(o): %.$(C++_SUFFIX) | $(archdir)
 	$(ECHO_TARGET)
 	$(C++) $(C++_ALL_FLAGS) -c -o $@ $<
 
 #
 # archdir/%.o: --Compile a generated C++ file into the arch sub-directory.
 #
-$(archdir)/%.o: $(gendir)/%.$(C++_SUFFIX) | $(archdir)
+$(archdir)/%.$(o): $(gendir)/%.$(C++_SUFFIX) | $(archdir)
 	$(ECHO_TARGET)
 	$(C++) $(C++_ALL_FLAGS) -c -o $@ $<
 #
+# %.s.o: --Compile a C++ file into PIC code.
+#
+# Remarks:
+# This is a repeat of the static build rules, but for shared libraries.
+#
+$(archdir)/%.$(s.o): %.$(C++_SUFFIX) | $(archdir)
+	$(ECHO_TARGET)
+	$(C++) $(C++_ALL_FLAGS) $(C++_SHARED_FLAGS) -c -o $@ $<
+
+#
+# archdir/%.o: --Compile a generated C++ file PIC.
+#
+$(archdir)/%.$(o): $(gendir)/%.$(C++_SUFFIX) | $(archdir)
+	$(ECHO_TARGET)
+	$(C++) $(C++_ALL_FLAGS) $(C++_SHARED_FLAGS) -c -o $@ $<
+
+#
 # build[%.c++]: --Build a C++ file's related object.
 #
-build[%.$(C++_SUFFIX)]:   $(archdir)/%.o; $(ECHO_TARGET)
+build[%.$(C++_SUFFIX)]:   $(archdir)/%.$(o); $(ECHO_TARGET)
 
 #
 # %.gcov: --Build a text-format coverage report.
 #
 %.$(C++_SUFFIX).gcov:	$(archdir)/%.gcda
 	$(ECHO_TARGET)
-	@echo gcov -o $(archdir) $*.$(C++_SUFFIX)
-	@gcov -o $(archdir) $*.$(C++_SUFFIX) | \
+	gcov -o $(archdir) $*.$(C++_SUFFIX) | \
             sed -ne '/^Lines/s/.*:/gcov $*.$(C++_SUFFIX): /p'
 
 #
@@ -129,7 +157,7 @@ $(includedir)/%.$(H++_SUFFIX):	$(gendir)/%.$(H++_SUFFIX)
 # on your compiler...
 #
 +c++-defines:
-	@touch ..$(C++_SUFFFIX); \
+	$(Q)touch ..$(C++_SUFFFIX); \
             $(C++) -E -dM ..$(C++_SUFFIX); \
             $(RM) ..$(C++_SUFFIX)
 
@@ -146,11 +174,12 @@ build-c++:	$(C++_OBJ) $(C++_MAIN_OBJ) $(C++_MAIN)
 # for compilation.
 #
 $(C++_OBJ) $(C++_MAIN_OBJ) $(C++_MAIN):	| build-subdirs
+$(C++_PIC_OBJ) $(C++_MAIN_PIC_OBJ):	| build-subdirs
 
 #
 # build[%]: --Build a C++ file's related object.
 #
-build[%.%(C++_SUFFIX)]:   $(archdir)/%.o; $(ECHO_TARGET)
+build[%.$(C++_SUFFIX)]:   $(archdir)/%.$(o); $(ECHO_TARGET)
 
 #
 # install: --Install "C++" programs.
@@ -165,10 +194,10 @@ install-c++:	$(C++_MAIN:$(archdir)/%=$(bindir)/%)
 #
 # uninstall: --Uninstall "C++" programs.
 #
-uninstall-c++: src-var-defined[C++_MAIN_SRC]
+uninstall-c++:
 	$(ECHO_TARGET)
 	$(RM) $(C++_MAIN:$(archdir)/%=$(bindir)/%)
-	$(RMDIR) -p $(bindir) 2>/dev/null || true
+	$(RMDIR) -p $(bindir) 2>/dev/null ||:
 
 #
 # clean: --Remove objects and executables created from C++ files.
@@ -176,12 +205,12 @@ uninstall-c++: src-var-defined[C++_MAIN_SRC]
 clean:	clean-c++
 clean-c++:
 	$(ECHO_TARGET)
-	$(RM) $(C++_MAIN) $(C++_MAIN_OBJ) $(C++_MAIN_OBJ:%.o=%.d) $(C++_MAIN_OBJ:%.o=%.map) $(C++_OBJ) $(C++_OBJ:%.o=%.d)
+	$(RM) $(C++_MAIN) $(C++_MAIN_OBJ) $(C++_MAIN_OBJ:%.$(o)=%.d) $(C++_MAIN_OBJ:%.$(o)=%.map) $(C++_OBJ) $(C++_OBJ:%.$(o)=%.d)
 
 #
 # tidy: --Reformat C++ files consistently.
 #
-C++_INDENT ?= INDENT_PROFILE=$(DEVKIT_HOME)/etc/.indent.pro indent
+C++_INDENT ?= INDENT_PROFILE=$(MAKESHIFT_HOME)/etc/.indent.pro indent
 C++_INDENT_FLAGS = $(OS.C++_INDENT_FLAGS) $(ARCH.C++_INDENT_FLAGS) \
     $(PROJECT.C++_INDENT_FLAGS) $(LOCAL.C++_INDENT_FLAGS) $(TARGET.C++_INDENT_FLAGS)
 tidy:	tidy-c++
@@ -232,10 +261,10 @@ toc[%.$(H++_SUFFIX)]:
 src:	src-c++
 src-c++:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn C++_SRC *.$(C++_SUFFIX)
-	@mk-filelist -f $(MAKEFILE) -qn C++_MAIN_SRC \
+	$(Q)mk-filelist -f $(MAKEFILE) -qn C++_SRC *.$(C++_SUFFIX)
+	$(Q)mk-filelist -f $(MAKEFILE) -qn C++_MAIN_SRC \
             $$(grep -l $(C++_MAIN_RGX) *.$(C++_SUFFIX) 2>/dev/null)
-	@mk-filelist -f $(MAKEFILE) -qn H++_SRC *.$(H++_SUFFIX)
+	$(Q)mk-filelist -f $(MAKEFILE) -qn H++_SRC *.$(H++_SUFFIX)
 
 #
 # tags: --Build vi, emacs tags files for C++ files.
@@ -251,4 +280,10 @@ tags-c++:	c++-src-defined
 todo:	todo-c++
 todo-c++:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(H++_SRC) $(C++_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(H++_SRC) $(C++_SRC) /dev/null ||:
+
+#
+# +version: --Report details of tools used by C++.
+#
++version: cmd-version[$(C++)] cmd-version[$(C++_INDENT_CMD)] \
+    cmd-version[$(C++_LINT_CMD)]

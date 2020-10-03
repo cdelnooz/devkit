@@ -29,11 +29,11 @@ install-www-php:	$(PHP_SRC:%.php=$(wwwdir)/%.php)
 
 uninstall-lib-php:
 	$(RM) $(PHP_SRC:%.php=$(phplibdir)/%.php)
-	$(RMDIR) -p $(phplibdir) 2>/dev/null || true
+	$(RMDIR) -p $(phplibdir) 2>/dev/null ||:
 
 uninstall-www-php:
 	$(RM) $(PHP_SRC:%.php=$(wwwdir)/%.php)
-	$(RMDIR) -p $(wwwdir) 2>/dev/null || true
+	$(RMDIR) -p $(wwwdir) 2>/dev/null ||:
 
 #
 # toc: --Build the table-of-contents for PHP-ish files.
@@ -49,7 +49,7 @@ toc-php:
 src:	src-php
 src-php:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn PHP_SRC *.php
+	$(Q)mk-filelist -f $(MAKEFILE) -qn PHP_SRC *.php
 
 #
 # todo: --Report unfinished work in PHP source code.
@@ -57,7 +57,7 @@ src-php:
 todo:	todo-php
 todo-php:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(PHP_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(PHP_SRC) /dev/null ||:
 
 #
 # system-php.ini: --Create a PHP configuration file based on current system settings.

@@ -7,6 +7,7 @@
 # install-lib-lib:     --Install the library ".a", ".so" files only.
 # install-lib-include: --Install the library include files only.
 # install-lib-man:     --Install manual pages for the library only.
+# clean:               --Remove the include files installed at $LIB_ROOT/include.
 # distclean:           --Remove the include files installed at $LIB_ROOT/include.
 #
 # Remarks:
@@ -50,7 +51,7 @@ include $(LIB_TYPE:%=library/%.mk)
 #
 $(LIB_INCLUDEDIR)/%:		$(archdir)/%;	$(INSTALL_RDONLY) $? $@
 $(LIB_INCLUDEDIR)/%:		$(gendir)/%;	$(INSTALL_RDONLY) $? $@
-$(LIB_INCLUDEDIR)/%:		%;		$(INSTALL_RDONLY) $* $@
+$(LIB_INCLUDEDIR)/%:		%;		$(INSTALL_RDONLY) $? $@
 #
 # Respecify pattern rules to avoid the trailing // if subdir is empty,
 # so that dependencies can be declared more naturally (otherwise make
@@ -58,7 +59,7 @@ $(LIB_INCLUDEDIR)/%:		%;		$(INSTALL_RDONLY) $* $@
 #
 $(LIB_ROOT)/include/%:		$(archdir)/%;	$(INSTALL_RDONLY) $? $@
 $(LIB_ROOT)/include/%:		$(gendir)/%;	$(INSTALL_RDONLY) $? $@
-$(LIB_ROOT)/include/%:		%;		$(INSTALL_RDONLY) $* $@
+$(LIB_ROOT)/include/%:		%;		$(INSTALL_RDONLY) $? $@
 
 #
 # pre-build: --Stage the include files.
@@ -87,12 +88,12 @@ uninstall-lib: uninstall-lib-lib uninstall-lib-include uninstall-lib-man
 
 uninstall-lib-include:
 	$(ECHO_TARGET)
-	$(RMDIR) -p $(includedir) 2>/dev/null || true
+	$(RMDIR) -p $(includedir) 2>/dev/null ||:
 
 uninstall-lib-man:
 	$(ECHO_TARGET)
 	$(RM) $(MAN3_SRC:%.3=$(man3dir)/%.3)
-	$(RMDIR) -p $(man3dir) 2>/dev/null || true
+	$(RMDIR) -p $(man3dir) 2>/dev/null ||:
 
 #
 # clean: --Remove the include files installed at $LIB_ROOT/include.
@@ -100,11 +101,11 @@ uninstall-lib-man:
 clean: clean-lib
 clean-lib:
 	$(ECHO_TARGET)
-	$(RMDIR) -p $(LIB_INCLUDEDIR) 2>/dev/null || true
+	$(RMDIR) -p $(LIB_INCLUDEDIR) 2>/dev/null ||:
 #
 # distclean: --Remove the include files installed at $LIB_ROOT/include.
 #
 distclean: clean-lib distclean-lib
 distclean-lib:
 	$(ECHO_TARGET)
-	$(RMDIR) -p $(LIB_INCLUDEDIR) 2>/dev/null || true
+	$(RMDIR) -p $(LIB_INCLUDEDIR) 2>/dev/null ||:

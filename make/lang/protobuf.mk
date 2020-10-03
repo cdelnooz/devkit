@@ -1,21 +1,24 @@
 #
-# PROTOBUF.MK --Rules for building compiling protobuf protocols.
+# PROTOBUF.MK --Rules for building protobuf protocols.
 #
 # Contents:
-# %.pb.cc: --build the C++ stubs from a ".proto" file.
-# %.py:    --Build the python stubs from a ".proto" file.
-# build:   --Build the protobuf files.
-# clean:   --Remove objects and intermediates created from protobuf files.
-# src:     --Update the PROTOBUF_SRC macro.
-# todo:    --Find "unfinished work" comments in protobuf files.
+# %.pb.cc:  --build the C++ stubs from a ".proto" file.
+# %.py:     --Build the python stubs from a ".proto" file.
+# build:    --Build the protobuf files.
+# clean:    --Remove objects and intermediates created from protobuf files.
+# src:      --Update the PROTOBUF_SRC macro.
+# todo:     --Find "unfinished work" comments in protobuf files.
+# +version: --Report details of tools used by protobuf
 #
 # Remarks:
 # The protobuf module adds support for building Protobuf-related software.
 # It defines some pattern rules for compiling ".proto" files into
 # C++, python (but not java, yet).
-# REVISIT: consider a flag for optionally building various language stubs (e.g. protobuf_lang = c++ python java)
+# REVISIT: consider a flag for optionally building various language stubs (e.g. protobuf-lang = c++ python java)
 #
 .PHONY: $(recursive-targets:%=%-protobuf)
+
+PRINT_protoc_VERSION = protoc --version
 
 ifdef autosrc
     LOCAL_PROTOBUF_SRC := $(wildcard *.proto)
@@ -39,19 +42,21 @@ PROTOBUF_TRG  = $(PROTOBUF_C++) $(PROTOBUF_H++) $(PROTOBUF_PY) \
 
 .PRECIOUS: $(PROTOBUF_TRG)
 
-ifdef .o
-PROTOBUF_OBJ = $(PROTOBUF_SRC:%.proto=$(archdir)/%.pb.$(.o))
-endif
-ifdef .s.o
-PROTOBUF_OBJ += $(PROTOBUF_SRC:%.proto=$(archdir)/%.pb.$(.s.o))
-endif
+## This section breaks non C/C++ builds; I don't think protobuf.mk
+## should be adding object files to the build target
+#ifdef o
+#PROTOBUF_OBJ = $(PROTOBUF_SRC:%.proto=$(archdir)/%.pb.$(o))
+#endif
+#ifdef s.o
+#PROTOBUF_PIC_OBJ += $(PROTOBUF_SRC:%.proto=$(archdir)/%.pb.$(s.o))
+#endif
 
 #
 # %.pb.cc: --build the C++ stubs from a ".proto" file.
 #
 # Remarks:
 # This is a little more involved than a simple tool invocation,
-# because devkit supports custom C++ file extensions, and so this
+# because makeshift supports custom C++ file extensions, and so this
 # rule adapts protoc's output accordingly.
 #
 $(gendir)/%.pb.$(C++_SUFFIX) $(gendir)/%.pb.$(H++_SUFFIX):	%.proto | $(gendir)
@@ -104,7 +109,7 @@ clean-protobuf:
 src:	src-protobuf
 src-protobuf:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn PROTOBUF_SRC *.proto
+	$(Q)mk-filelist -f $(MAKEFILE) -qn PROTOBUF_SRC *.proto
 
 #
 # todo: --Find "unfinished work" comments in protobuf files.
@@ -112,4 +117,9 @@ src-protobuf:
 todo:	todo-protobuf
 todo-protobuf:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(PROTOBUF_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(PROTOBUF_SRC) /dev/null ||:
+
+#
+# +version: --Report details of tools used by protobuf
+#
++version: cmd-version[$(PROTOC)]

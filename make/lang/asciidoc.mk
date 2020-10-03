@@ -12,6 +12,7 @@
 # src:       --Update the TXT_SRC macro with a list of asciidoc text files.
 # clean:     --cleanup asciidoc intermediate files (.xml, .fo, .pdf).
 # todo:      --Report unfinished work in asciidoc files.
+# +version:  --Report details of tools used by asciidoc.
 #
 # Remarks:
 # The asciidoc module manages a list of simple asciidoc documents with
@@ -21,6 +22,11 @@
 # will attempt to build both PDF and HTML.
 #
 .PHONY: $(recursive-targets:%=%-asciidoc)
+
+PRINT_asciidoc_VERSION = asciidoc --version
+PRINT_fop_VERSION = fop -version
+PRINT_xmllint_VERSION = xmllint --version
+PRINT_xsltproc_VERSION = xsltproc --version
 
 ifdef autosrc
     LOCAL_TXT_SRC := $(wildcard *.txt)
@@ -67,7 +73,7 @@ HTML_XSL = /opt/local/etc/asciidoc/docbook-xsl/xhtml.xsl
 #
 # build: --Build PDF and HTML documents from asciidoc files.
 #
-build:	build-asciidoc-html build-asciidoc-pdf
+build:	build-asciidoc-html build-asciidoc-pdf | cmd-exists[asciidoc]
 
 build-asciidoc-html:	$(TXT_SRC:%.txt=%.html)
 build-asciidoc-pdf:	$(TXT_SRC:%.txt=%.pdf)
@@ -84,7 +90,7 @@ install-asciidoc: $(TXT_SRC:%.txt=$(docdir)/%.pdf)
 uninstall-asciidoc:
 	$(ECHO_TARGET)
 	$(RM) $(TXT_SRC:%.txt=$(docdir)/%.pdf)
-	$(RMDIR) -p $(docdir) 2>/dev/null || true
+	$(RMDIR) -p $(docdir) 2>/dev/null ||:
 
 #
 # src: --Update the TXT_SRC macro with a list of asciidoc text files.
@@ -92,7 +98,7 @@ uninstall-asciidoc:
 src:	src-asciidoc
 src-asciidoc:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn TXT_SRC *.txt
+	$(Q)mk-filelist -f $(MAKEFILE) -qn TXT_SRC *.txt
 
 #
 # clean: --cleanup asciidoc intermediate files (.xml, .fo, .pdf).
@@ -108,4 +114,10 @@ clean-asciidoc:
 todo:	todo-asciidoc
 todo-asciidoc:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(TXT_SRC)  /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(TXT_SRC)  /dev/null ||:
+
+#
+# +version: --Report details of tools used by asciidoc.
+#
++version: cmd-version[asciidoc] cmd-version[fop] \
+    cmd-version[xsltproc] cmd-version[xmllint]

@@ -21,14 +21,19 @@
 #
 # * PACKAGE --the name of the package
 # * VERSION --(ideally a three-number triple updated "semantically")
+# * BUILD --build identifier (ideally derived from VCS).
 #
 # See Also:
 # https://semver.org
+#
+# TODO: Add support for building Windows ".msi" packages.
 #
 LOCAL_PACKAGE := $(notdir $(CURDIR))
 PACKAGE ?= $(LOCAL_PACKAGE)
 
 P-V	= $(PACKAGE)$(VERSION:%=-%)
+P_V.B	= $(PACKAGE)$(VERSION:%=_%)$(BUILD:%=.%)
+
 DESTDIR_ROOT = staging-$(PACKAGE)
 VCS_EXCLUDES = --exclude .git --exclude .svn
 
@@ -62,7 +67,7 @@ release: vcs-tag[$(VERSION)]
 # Remarks:
 # This target execs another make to do a distclean before building the tar.gz.
 # REVISIT: make sure symlink is cleaned up always!
-# TODO: this is a std target, migrate it to devkit.mk
+# TODO: this is a std target, migrate it to makeshift.mk
 #
 dist:	$(P-V).tar.gz
 $(P-V).tar.gz:

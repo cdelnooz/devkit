@@ -8,6 +8,7 @@
 # %-rpm-files.txt:    --Build a manifest file for the RPM's "file" section.
 # clean:              --Remove the RPM manifest file.
 # distclean:          --Remove the RPM file.
+# +version:           --Report details of tools used by RPM packaging
 #
 # Remarks:
 # The package/rpm module provides support for building an RPM package
@@ -29,11 +30,12 @@
 # See Also:
 # https://fedoraproject.org/wiki/How_to_create_an_RPM_package
 #
-RPM_DEFAULT_ARCH := $(shell mk-rpm-buildarch)
-RPM_ARCH ?= $(RPM_DEFAULT_ARCH)
+RPM_ARCH ?= $(shell mk-rpm-buildarch)
+RPM_ARCH := $(RPM_ARCH)
+
+PRINT_rpmbuild_VERSION = rpmbuild --version
 
 RPMDIRS = BUILD BUILDROOT RPMS SOURCES SPECS SRPMS
-V-R.A	= $(VERSION)-$(BUILD).$(RPM_ARCH)
 
 RPMBUILD ?= rpmbuild
 RPM_FLAGS = --define "_topdir $(CURDIR)" \
@@ -43,9 +45,10 @@ RPM_FLAGS = --define "_topdir $(CURDIR)" \
 #
 # package-rpm: --build a package in this directory.
 #
-.PHONY:		package-rpm
+.PHONY:		package-rpm rpm
 package:	package-rpm
-rpm:	package-rpm
+rpm:		package-rpm
+
 package-rpm:	SPECS/$(PACKAGE).spec
 	$(ECHO_TARGET)
 	$(MKDIR) RPMS
@@ -135,3 +138,8 @@ clean-rpm:
 .PHONY:	distclean-rpm
 distclean-rpm:
 	$(RM) -r -- $(RPMDIRS) $(P-V).tar.gz
+
+#
+# +version: --Report details of tools used by RPM packaging
+#
++version: cmd-version[$(RPMBUILD)]

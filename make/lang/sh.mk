@@ -42,19 +42,23 @@ ifdef autosrc
 endif
 
 shlibdir	:= $(exec_prefix)/lib/sh/$(subdir)
-SHELL_TRG	:= $(SH_SRC:%.sh=%) $(AWK_SRC:%.awk=%) $(SED_SRC:%.sed=%)
+SH_TRG	:= $(SH_SRC:%.sh=%)
+AWK_TRG	:= $(AWK_SRC:%.awk=%)
+SED_TRG	:= $(SED_SRC:%.sed=%)
+SHELL_TRG := $(SH_TRG) $(AWK_TRG) $(SED_TRG)
 
-SET_VERSION = $(SED) -e '/^ *version=/s/=.*/=$(VERSION)/' -e '/^ *build=/s/=.*/=$(BUILD)/'
+SET_VERSION = $(SED) -e '/^ *version=/s/=.*/=$(VERSION)/;/^ *build=/s/=.*/=$(BUILD)/'
 
 #
 # %.sh: --Rules for installing shell scripts, libraries
 #
-%:			%.sh;	$(SET_VERSION) <$*.sh >$@ && $(CHMOD) +x $@
-%:			%.awk;	$(SET_VERSION) <$*.awk >$@ && $(CHMOD) +x $@
-%:			%.sed;	$(SET_VERSION) <$*.sed >$@ && $(CHMOD) +x $@
-$(bindir)/%:		%.sh;	$(INSTALL_SCRIPT) $*.sh $@
-$(bindir)/%:		%.sed;	$(INSTALL_SCRIPT) $*.sed $@
-$(bindir)/%:		%.awk;	$(INSTALL_SCRIPT) $*.awk $@
+%:			%.sh;	$(SET_VERSION) < $*.sh > $@ && $(CHMOD) +x $@
+%:			%.awk;	$(SET_VERSION) < $*.awk >$@ && $(CHMOD) +x $@
+%:			%.sed;	$(SET_VERSION) < $*.sed > $@ && $(CHMOD) +x $@
+
+$(bindir)/%:		%;	$(INSTALL_SCRIPT) $* $@
+$(sbindir)/%:		%;	$(INSTALL_SCRIPT) $* $@
+
 $(shlibdir)/%.shl:	%.shl;	$(INSTALL_DATA) $*.shl $@
 $(shlibdir)/%.awk:	%.awk;	$(INSTALL_DATA) $*.awk $@
 $(shlibdir)/%.sed:	%.sed;	$(INSTALL_DATA) $*.sed $@
@@ -93,7 +97,7 @@ uninstall-sh:
 	$(ECHO_TARGET)
 	$(RM) $(SH_SRC:%.sh=$(bindir)/%) $(SHL_SRC:%=$(shlibdir)/%) \
             $(SED_SRC:%.sed=$(bindir)/%) $(AWK_SRC:%.awk=$(bindir)/%)
-	$(RMDIR) -p $(bindir) $(shlibdir) 2>/dev/null || true
+	$(RMDIR) -p $(bindir) $(shlibdir) 2>/dev/null ||:
 
 #
 # clean: --Remove shell, awk, sed script executables.
@@ -117,10 +121,10 @@ toc-sh:
 src:	src-sh
 src-sh:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn SH_SRC *.sh
-	@mk-filelist -f $(MAKEFILE) -qn SHL_SRC *.shl
-	@mk-filelist -f $(MAKEFILE) -qn AWK_SRC *.awk
-	@mk-filelist -f $(MAKEFILE) -qn SED_SRC *.sed
+	$(Q)mk-filelist -f $(MAKEFILE) -qn SH_SRC *.sh
+	$(Q)mk-filelist -f $(MAKEFILE) -qn SHL_SRC *.shl
+	$(Q)mk-filelist -f $(MAKEFILE) -qn AWK_SRC *.awk
+	$(Q)mk-filelist -f $(MAKEFILE) -qn SED_SRC *.sed
 
 #
 # todo: --Report unfinished work in shell, awk, sed code.
@@ -129,12 +133,12 @@ todo:	todo-sh
 todo-sh:
 	$(ECHO_TARGET)
 	@$(GREP) $(TODO_PATTERN) \
-	    $(SH_SRC) $(SHL_SRC) $(AWK_SRC) $(SED_SRC) /dev/null || true
+	    $(SH_SRC) $(SHL_SRC) $(AWK_SRC) $(SED_SRC) /dev/null ||:
 
 #
 # lint: --Check sh style.
 #
-SH_LINT ?= shellcheck
+SH_LINT ?= :
 SH_LINT_FLAGS = $(OS.SH_LINT_FLAGS) $(ARCH.SH_LINT_FLAGS) \
     $(PROJECT.SH_LINT_FLAGS) $(LOCAL.SH_LINT_FLAGS) $(TARGET.SH_LINT_FLAGS)
 lint:	lint-sh

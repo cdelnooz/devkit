@@ -65,7 +65,7 @@ install-svg:	$(SVG_SRC:%=$(wwwdir)/%)
 uninstall-img:
 	$(ECHO_TARGET)
 	$(RM) $(PNG_SRC:%=$(wwwdir)/%) $(GIF_SRC:%=$(wwwdir)/%) $(JPG_SRC:%=$(wwwdir)/%) $(SVG_SRC:%=$(wwwdir)/%)
-	$(RMDIR) -p $(wwwdir) 2>/dev/null || true
+	$(RMDIR) -p $(wwwdir) 2>/dev/null ||:
 
 #
 # src-img: --Update PNG_SRC, GIF_SRC, JPG_SRC macros.
@@ -73,7 +73,7 @@ uninstall-img:
 src:	src-img
 src-img:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn PNG_SRC *.png
-	@mk-filelist -f $(MAKEFILE) -qn GIF_SRC *.gif
-	@mk-filelist -f $(MAKEFILE) -qn JPG_SRC *.jpg
-	@mk-filelist -f $(MAKEFILE) -qn SVG_SRC *.svg
+	$(Q)mk-filelist -f $(MAKEFILE) -qn PNG_SRC *.png
+	$(Q)mk-filelist -f $(MAKEFILE) -qn GIF_SRC *.gif
+	$(Q)mk-filelist -f $(MAKEFILE) -qn JPG_SRC *.jpg
+	$(Q)mk-filelist -f $(MAKEFILE) -qn SVG_SRC *.svg

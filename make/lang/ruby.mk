@@ -34,7 +34,7 @@ install-ruby: $(RB_SRC:%.rb=$(bindir)/%); $(ECHO_TARGET)
 uninstall-ruby:
 	$(ECHO_TARGET)
 	$(RM) $(RB_SRC:%.rb=$(bindir)/%)
-	$(RMDIR) -p $(bindir) 2>/dev/null || true
+	$(RMDIR) -p $(bindir) 2>/dev/null ||:
 
 #
 # install-ruby-lib: --Install ruby as library modules.
@@ -44,7 +44,7 @@ install-ruby-lib: $(RB_SRC:%.rb=$(rubylibdir)/%.rb); $(ECHO_TARGET)
 uninstall-ruby-lib:
 	$(ECHO_TARGET)
 	$(RM) $(RB_SRC:%.rb=$(rubylibdir)/%)
-	$(RMDIR) -p $(rubylibdir) 2>/dev/null || true
+	$(RMDIR) -p $(rubylibdir) 2>/dev/null ||:
 
 
 #
@@ -68,11 +68,11 @@ toc-ruby:
 src:	src-ruby
 src-ruby:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn RB_SRC *.rb
+	$(Q)mk-filelist -f $(MAKEFILE) -qn RB_SRC *.rb
 #
 # todo: --Report unfinished work in ruby files.
 #
 todo:	todo-ruby
 todo-ruby:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(RB_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(RB_SRC) /dev/null ||:

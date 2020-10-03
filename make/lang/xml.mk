@@ -34,7 +34,7 @@ install-xml: $(XML_SRC:%=$(datadir)/%)
 src:	src-xml
 src-xml:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn XML_SRC *.xml
+	$(Q)mk-filelist -f $(MAKEFILE) -qn XML_SRC *.xml
 
 #
 # todo: --Report unfinished work in XML files.
@@ -42,4 +42,4 @@ src-xml:
 todo:	xml-todo
 xml-todo:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(XML_SRC)  /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(XML_SRC)  /dev/null ||:
