@@ -1,5 +1,5 @@
 #
-# MK.MK --devkit rules for manipulating ".mk" files.
+# MK.MK --makeshift rules for manipulating ".mk" files.
 #
 # Contents:
 # install-mk:   --Install ".mk" files to their usual places.
@@ -8,8 +8,11 @@
 # toc:          --Rebuild a Makefile's table-of-contents.
 # todo:         --Report unfinished work in Makefiles.
 # +stddirs:     --Print the current make directory macros.
+# +version:     --Report the version of make.
 #
 .PHONY: $(recursive-targets:%=%-mk)
+
+PRINT_make_VERSION = make --version
 
 ifdef autosrc
     LOCAL_MK_SRC := $(wildcard *.mk)
@@ -30,7 +33,7 @@ install-mk:     $(MK_SRC:%.mk=$(includedir)/%.mk)
 uninstall-mk:
 	$(ECHO_TARGET)
 	$(RM) $(MK_SRC:%.mk=$(includedir)/%.mk)
-	$(RMDIR) -p $(includedir) 2>/dev/null || true
+	$(RMDIR) -p $(includedir) 2>/dev/null ||:
 
 #
 # src: --Update MK_SRC with the list of ".mk" files.
@@ -38,7 +41,7 @@ uninstall-mk:
 src:	src-mk
 src-mk:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn MK_SRC *.mk .mk
+	$(Q)mk-filelist -f $(MAKEFILE) -qn MK_SRC *.mk .mk
 
 #
 # toc: --Rebuild a Makefile's table-of-contents.
@@ -46,7 +49,7 @@ src-mk:
 toc:	toc-mk
 toc-mk:
 	$(ECHO_TARGET)
-	@mk-toc Makefile $(MK_SRC)
+	$(Q)mk-toc Makefile $(MK_SRC)
 
 #
 # todo: --Report unfinished work in Makefiles.
@@ -54,7 +57,7 @@ toc-mk:
 todo:	todo-mk
 todo-mk:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) Makefile $(MK_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) Makefile $(MK_SRC) /dev/null ||:
 
 #
 # +stddirs: --Print the current make directory macros.
@@ -87,3 +90,8 @@ todo-mk:
 	@echo "includedir:     $(includedir)"
 	@echo "mandir:         $(mandir)"
 	@echo "docdir:         $(docdir)"
+
+#
+# +version: --Report the version of make.
+#
++version: cmd-version[make]

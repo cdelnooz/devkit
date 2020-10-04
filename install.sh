@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# INSTALL.SH --Simple install script for devkit.
+# INSTALL.SH --Simple install script for makeshift.
 #
 # Usage:
 #     sh install.sh [make arg.s...]
@@ -14,16 +14,18 @@
 # Then we can do a full self-hosted install.
 #
 mk_args="OS=unknown ARCH=all PROJECT=default VARIANT=default $*"
+PATH=$PWD/bin:$PATH
 
-install_self() ( cd make && make build -I$PWD $mk_args )
-install_all() { make -I$PWD/make build install $mk_args; }
+build_bin() { make -I$PWD/make -C bin build $mk_args; }
+build_self() { make -I$PWD/make build $mk_args; }
+install_all() { make -I$PWD/make install $mk_args; }
 
 os_warning()
 {
     cat <<EOF
 
 Usage:
-To use devkit, you will need to define two variables: OS, ARCH.
+To use makeshift, you will need to define two variables: OS, ARCH.
 These variables customise the behaviour of make in system-specific ways.
 You can either define them as environment variables or per-invocation of
 make, e.g.:
@@ -45,8 +47,8 @@ prefix_warning()
     if [ "$prefix" != '/usr/local' ]; then
     cat <<EOF
 
-You have installed devkit into "$prefix".
-To use the devkit you just installed you will need to invoke make as:
+You have installed makeshift into "$prefix".
+To use the makeshift you just installed you will need to invoke make as:
 
     make -I$prefix
 EOF
@@ -55,17 +57,17 @@ EOF
 
 Some of the tool-related targets will reference configuration
 files in "$prefix/etc".  For these targets to work, you will need to
-define the DEVKIT_HOME variable, e.g.:
+define the MAKESHIFT_HOME variable, e.g.:
 
-    export DEVKIT_HOME=$prefix
+    export MAKESHIFT_HOME=$prefix
 EOF
 }
 
-if install_self && install_all; then
+if build_bin && build_self && install_all; then
     eval $(make -I$PWD/make +var[prefix] $mk_args)
     cat <<EOF
 
-Devkit has been successfully installed.
+Makeshift has been successfully installed.
 $(os_warning)
 $(prefix_warning)
 EOF

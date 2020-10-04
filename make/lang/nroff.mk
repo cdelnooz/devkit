@@ -8,8 +8,12 @@
 # uninstall-man: --uninstall manual pages from their usual places.
 # clean-nroff:   --Cleanup nroff files.
 # todo:          --Report unfinished work (identified by keyword comments)
+# +version:      --Report details of tools used by nroff.
 #
 .PHONY: $(recursive-targets:%=%-nroff)
+
+PRINT_groff_VERSION = groff --version
+PRINT_ps2pdf_VERSION = echo "unknown version"
 
 ifdef autosrc
     LOCAL_MAN1_SRC := $(wildcard *.1)
@@ -50,7 +54,7 @@ $(man8dir)/%.8:	%.8;	$(INSTALL_DATA) $? $@
 #
 toc:	toc-nroff
 toc-nroff:
-	@$(ECHO_TARGET)
+	$(ECHO_TARGET)
 	mk-toc $(MAN1_SRC) $(MAN3_SRC) $(MAN5_SRC) $(MAN7_SRC) $(MAN8_SRC)
 
 #
@@ -63,11 +67,11 @@ toc-nroff:
 src:	src-nroff
 src-nroff:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn MAN1_SRC *.1
-	@mk-filelist -f $(MAKEFILE) -qn MAN3_SRC *.3
-	@mk-filelist -f $(MAKEFILE) -qn MAN5_SRC *.5
-	@mk-filelist -f $(MAKEFILE) -qn MAN7_SRC *.7
-	@mk-filelist -f $(MAKEFILE) -qn MAN8_SRC *.8
+	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN1_SRC *.1
+	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN3_SRC *.3
+	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN5_SRC *.5
+	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN7_SRC *.7
+	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN8_SRC *.8
 
 doc:	$(MAN1_SRC:%.1=%.1.pdf) $(MAN3_SRC:%.3=%.3.pdf) \
 	$(MAN5_SRC:%.5=%.5.pdf) $(MAN7_SRC:%.7=%.7.pdf) \
@@ -94,7 +98,7 @@ install-man:    $(MAN1_SRC:%=$(man1dir)/%) $(MAN3_SRC:%=$(man3dir)/%) \
 .PHONY: uninstall-man
 uninstall-man:
 	$(RM) $(MAN1_SRC:%=$(man1dir)/%) $(MAN3_SRC:%=$(man3dir)/%) $(MAN5_SRC:%=$(man5dir)/%) $(MAN7_SRC:%=$(man7dir)/%) $(MAN8_SRC:%=$(man8dir)/%)
-	$(RMDIR) -p $(man1dir) $(man3dir) $(man5dir) $(man7dir) $(man8dir) 2>/dev/null || true
+	$(RMDIR) -p $(man1dir) $(man3dir) $(man5dir) $(man7dir) $(man8dir) 2>/dev/null ||:
 
 #
 # clean-nroff: --Cleanup nroff files.
@@ -110,4 +114,9 @@ clean-nroff:
 todo:	todo-nroff
 todo-nroff:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(MAN1_SRC) $(MAN3_SRC) $(MAN5_SRC) $(MAN7_SRC) $(MAN8_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(MAN1_SRC) $(MAN3_SRC) $(MAN5_SRC) $(MAN7_SRC) $(MAN8_SRC) /dev/null ||:
+
+#
+# +version: --Report details of tools used by nroff.
+#
++version: cmd-version[groff] cmd-version[ps2pdf]

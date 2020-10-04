@@ -41,7 +41,7 @@ uninstall-lib-lib:	uninstall-lib-static-lib uninstall-lib-include
 uninstall-lib-static-lib:
 	$(ECHO_TARGET)
 	$(RM) $(libdir)/$(LIB_NAME).$(a)
-	$(RMDIR) -p $(libdir) 2>/dev/null || true
+	$(RMDIR) -p $(libdir) 2>/dev/null ||:
 
 #
 # archdir/%.a: --(re)build a library.
@@ -77,6 +77,6 @@ clean-lib-static:
 src:	src-lib-static
 src-lib-static:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qpn SUBLIB_SRC $$( \
+	$(Q)mk-filelist -f $(MAKEFILE) -qpn SUBLIB_SRC $$( \
 	    grep -l '^include.* library.mk' */*[Mm]akefile* 2>/dev/null | \
 	    sed -e 's|/[^/]*[Mm]akefile.*|/$$(archdir)/lib.$(a)|g' | sort -u)

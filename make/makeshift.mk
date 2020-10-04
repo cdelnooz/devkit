@@ -1,18 +1,18 @@
 #
-# devkit.mk --Recursive make considered useful.
+# makeshift.mk --Recursive make considered useful.
 #
 # Contents:
 # PWD:               --Force reset of PWD
 # OS:                --Set OS macro by interpolating "uname -s".
 # ARCH:              --Set ARCH macro by interpolating "uname -m".
 # VERBOSE:           --Control how (+how much, how colourful) echo's output is.
-# ECHO_TARGET:       --Common macro for logging in devkit targets.
+# ECHO_TARGET:       --Common macro for logging in makeshift targets.
 # no-implicit-rules: --Disable the archaic Makefile rules.
 # build:             --The default target
 # install-all:       --Install all language-specific items.
 # src:               --Make sure the src target can write to the Makefile.
-# clean:             --Devkit-specific customisations for the "clean" target.
-# distclean:         --Remove artefacts that devkit creates/updates.
+# clean:             --Makeshift-specific customisations for the "clean" target.
+# distclean:         --Remove artefacts that makeshift creates/updates.
 # +help:             --Output some help text extracted from the included makefiles.
 # stddir/%           --Common pattern rules for installing stuff into the "standard" places.
 # bindir/archdir:    --Rules for installing any executable from archdir.
@@ -21,7 +21,7 @@
 # %.pdf:             --Convert a PostScript file to PDF.
 #
 # Remarks:
-# The devkit makefiles together define a build system that extends
+# The makeshift makefiles together define a build system that extends
 # the "standard" targets (as documented by GNU make) with a few extras
 # for performing common maintenance functions.  The basic principles
 # are:
@@ -46,13 +46,14 @@
 #
 nullstring :=
 space := $(nullstring) # end of the line
+comma := ,
 MAKEFILE := $(firstword $(MAKEFILE_LIST))
-DEVKIT_HOME ?= /usr/local
--include devkit-version.mk
+MAKESHIFT_HOME ?= /usr/local
+-include makeshift-version.mk
 
 VERSION ?= local
 BUILD ?= latest
-SUBDIRS := $(subst /,,$(sort $(dir $(wildcard */*[mM]akefile*))))
+SUBDIRS ?= $(subst /,,$(sort $(dir $(wildcard */*[mM]akefile*))))
 
 #
 # define a target-specific tmpdir, for those targets that need it.
@@ -69,18 +70,15 @@ PWD := $(shell echo $$PWD)
 #
 # OS: --Set OS macro by interpolating "uname -s".
 #
-ifndef OS
-    OS := $(shell uname -s | tr A-Z a-z | sed -e 's/-[.0-9]*//')
-endif
+OS ?= $(shell uname -s | tr A-Z a-z | sed -e 's/-[.0-9]*//')
+OS := $(OS)
 export OS
 
 #
 # ARCH: --Set ARCH macro by interpolating "uname -m".
 #
-ifndef ARCH
-    ARCH := $(shell uname -m | tr A-Z a-z)
-endif
-export ARCH
+ARCH ?= $(shell uname -m | tr A-Z a-z)
+ARCH := $(ARCH)
 
 PROJECT ?= default
 LOCAL	:= $(subst lib,,$(notdir $(PWD)))
@@ -96,14 +94,17 @@ TODO_PATTERN = $(TODO_KEYWORDS:%=-e %)
 #
 ifeq "$(VERBOSE)" "color"
     ECHO = colour_echo() { printf '\033[36m++ $(CURDIR) $@: \033[33m%s\033[m\n' "$$*"; }; colour_echo
+    Q =
 else ifneq "$(VERBOSE)" ""
     ECHO = echo '++ $(CURDIR) $@: '
+    Q =
 else
     ECHO = :
+    Q = @
 endif
 
 #
-# ECHO_TARGET: --Common macro for logging in devkit targets.
+# ECHO_TARGET: --Common macro for logging in makeshift targets.
 #
 #ECHO_TARGET = @+$(ECHO) "\$$?: $?"
 #ECHO_TARGET = @+$(ECHO) "\$$^: $^"
@@ -119,19 +120,20 @@ ECHO_TARGET = @+$(ECHO) "\$$?: $?"; $(ECHO) "\$$^: $^"
 #     MAKEFLAGS += --no-builtin-rules --no-print-directory
 #
 # ...and this will work, as long as all the recursive makes are
-# using devkit.  However, if a leaf make is *not* using devkit,
+# using makeshift.  However, if a leaf make is *not* using makeshift,
 # it's probably relying on some of those builtin rules, and will
 # fail badly.
 #
 .SUFFIXES:
 
 #
-# build: --The default target
+# build: --The default target.
 #
 all:	build
+check:	test
 
-include $(VARIANT:%=variant/%.mk) os/$(OS).mk arch/$(ARCH).mk
-include project/$(PROJECT).mk
+-include $(VARIANT:%=variant/%.mk)
+include os/$(OS).mk arch/$(ARCH).mk project/$(PROJECT).mk
 #include vcs/$(VCS).mk
 
 #
@@ -149,7 +151,7 @@ include lang/mk.mk $(language:%=lang/%.mk) ld.mk
 # install-all: --Install all language-specific items.
 #
 # Remarks:
-# Devkit doesn't have any action for the install target, because
+# Makeshift doesn't have any action for the install target, because
 # it often makes good sense *not* to install everything that's built
 # (e.g. if it's just a local build utility, or it's part of something
 # bigger, etc.)
@@ -163,26 +165,26 @@ uninstall-all: $(language:%=uninstall-%)
 src:			| file-writable[$(MAKEFILE)]
 
 #
-# clean: --Devkit-specific customisations for the "clean" target.
+# clean: --Makeshift-specific customisations for the "clean" target.
 #
-clean:	clean-devkit
-.PHONY:	clean-devkit
-clean-devkit:
+clean:	clean-makeshift
+.PHONY:	clean-makeshift
+clean-makeshift:
 	$(ECHO_TARGET)
 	$(RM) *~ *.bak *.tmp *.out $(OS.AUTO_CLEAN) $(ARCH.AUTO_CLEAN)  $(PROJECT.AUTO_CLEAN)
 
 #
-# distclean: --Remove artefacts that devkit creates/updates.
+# distclean: --Remove artefacts that makeshift creates/updates.
 #
-distclean:	clean-devkit distclean-devkit
-.PHONY:	distclean-devkit
-distclean-devkit:
+distclean:	clean-makeshift distclean-makeshift
+.PHONY:	distclean-makeshift
+distclean-makeshift:
 	$(ECHO_TARGET)
 	$(RM) tags TAGS
 	$(RM) -r $(OS) $(ARCH) $(archdir)
 
 #
-# var[%]:	--Pattern rule to print a make "variable".
+# var[%]:	--Pattern rule to print a make variable.
 #
 #+vars:   $(.VARIABLES:%=+var[%])
 +var[%]:
@@ -198,10 +200,12 @@ distclean-devkit:
 #
 # +help: --Output some help text extracted from the included makefiles.
 #
+.PHONY: +help +features +dirs +files +version +env
 +help:			;	@mk-help $(MAKEFILE_LIST)
 +features:		;	@echo $(.FEATURES)
 +dirs:			;	@echo $(.INCLUDE_DIRS)
 +files:			;	@echo $(MAKEFILE_LIST)
++version:		;	@printf 'makeshift:\n\tversion %s\n\t%s\n' "$(MAKESHIFT_VERSION)-$(MAKESHIFT_BUILD)" "$(MAKESHIFT_HOME)"
 
 #
 # stddir/% --Common pattern rules for installing stuff into the "standard" places.
@@ -216,9 +220,9 @@ distclean-devkit:
 $(archdir):		;	$(MKDIR) $@
 $(gendir):		;	$(MKDIR) $@
 
-$(bindir)/%:		%;	$(INSTALL_PROGRAM) $? $@
-$(sbindir)/%:		%;	$(INSTALL_PROGRAM) $? $@
-$(libexecdir)/%:	%;	$(INSTALL_PROGRAM) $? $@
+$(bindir)/%:		%;	$(INSTALL_SCRIPT) $? $@
+$(sbindir)/%:		%;	$(INSTALL_SCRIPT) $? $@
+$(libexecdir)/%:	%;	$(INSTALL_SCRIPT) $? $@
 $(sysconfdir)/%:	%;	$(INSTALL_DATA) $? $@
 $(libdir)/%:		%;	$(INSTALL_DATA) $? $@
 $(datadir)/%:		%;	$(INSTALL_DATA) $? $@
@@ -229,6 +233,7 @@ $(wwwdir)/%:		%;	$(INSTALL_DATA) $? $@
 # bindir/archdir: --Rules for installing any executable from archdir.
 #
 $(bindir)/%:		$(archdir)/%;	$(INSTALL_PROGRAM) $? $@
+$(sbindir)/%:		$(archdir)/%;	$(INSTALL_PROGRAM) $? $@
 $(libexecdir)/%:	$(archdir)/%;	$(INSTALL_PROGRAM) $? $@
 #$(libdir)/%:		$(archdir)/%;	$(INSTALL_DATA) $? $@
 

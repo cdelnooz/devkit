@@ -21,6 +21,7 @@
 # src:           --Update the C_SRC, H_SRC, C_MAIN_SRC macros.
 # tags:          --Build vi, emacs tags files.
 # todo:          --Report "unfinished work" comments in C files.
+# +version:      --Report details of tools used by C.
 #
 # Remarks:
 # The "lang/c" module provides support for the "C" programming language.
@@ -32,6 +33,11 @@
 #
 
 .PHONY: $(recursive-targets:%=%-c)
+
+PRINT_gcc_VERSION = gcc --version
+PRINT_indent_VERSION = indent --version
+PRINT_uncrustify_VERSION = uncrustify --version
+PRINT_cppcheck_VERSION = cppcheck --version
 
 C_MAIN_RGX = '^[ \t]*int[ \t][ \t]*main[ \t]*('
 
@@ -149,8 +155,7 @@ $(includedir)/%.h:	$(gendir)/%.h
 # mostly filtered out.
 #
 %.c.gcov:	$(archdir)/%.gcda
-	@echo gcov -o $(archdir) $*.c
-	@gcov -o $(archdir) $*.c | sed -ne '/^Lines/s/.*:/gcov $*.c: /p'
+	gcov -o $(archdir) $*.c | sed -ne '/^Lines/s/.*:/gcov $*.c: /p'
 
 #
 # +c-defines: --Print a list of predefined macros for the "C" language.
@@ -160,7 +165,7 @@ $(includedir)/%.h:	$(gendir)/%.h
 # on your compiler...
 #
 +c-defines:
-	@touch ..c;  $(CC) -E -dM ..c; $(RM) ..c
+	$(Q)touch ..c;  $(CC) -E -dM ..c; $(RM) ..c
 
 #
 # build: --Build the C objects and executables.
@@ -189,7 +194,8 @@ build[%.c]:   $(archdir)/%.$(o); $(ECHO_TARGET)
 # The install (and uninstall) target is not invoked by default,
 # it must be added as a dependent of the "install" target.
 #
-install-c:	$(C_MAIN:$(archdir)/%=$(bindir)/%); $(ECHO_TARGET)
+install-c:	$(C_MAIN:$(archdir)/%=$(bindir)/%)
+	$(ECHO_TARGET)
 install-strip-c:	install-strip-file[$(C_MAIN:$(archdir)/%=$(bindir)/%)]
 	$(ECHO_TARGET)
 
@@ -199,7 +205,7 @@ install-strip-c:	install-strip-file[$(C_MAIN:$(archdir)/%=$(bindir)/%)]
 uninstall-c:
 	$(ECHO_TARGET)
 	$(RM) $(C_MAIN:$(archdir)/%=$(bindir)/%)
-	$(RMDIR) -p $(bindir) 2>/dev/null || true
+	$(RMDIR) -p $(bindir) 2>/dev/null ||:
 
 #
 # clean: --Remove objects and executables created from C files.
@@ -212,33 +218,36 @@ clean-c:
 #
 # tidy: --Reformat C files consistently.
 #
-C_INDENT ?= INDENT_PROFILE=$(DEVKIT_HOME)/etc/.indent.pro indent
+C_INDENT_ENV ?= INDENT_PROFILE=$(MAKESHIFT_HOME)/etc/.indent.pro
+C_INDENT_CMD ?= indent
+#C_INDENT_CMD_FLAGS ?=
 C_INDENT_FLAGS = $(OS.C_INDENT_FLAGS) $(ARCH.C_INDENT_FLAGS) \
     $(PROJECT.C_INDENT_FLAGS) $(LOCAL.C_INDENT_FLAGS) $(TARGET.C_INDENT_FLAGS)
 tidy:	tidy-c
 tidy-c:	c-src-defined
 	$(ECHO_TARGET)
-	$(C_INDENT) $(C_INDENT_FLAGS) $(H_SRC) $(C_SRC)
+	$(C_INDENT_ENV) $(C_INDENT_CMD) $(C_INDENT_FLAGS) $(C_INDENT_FLAGS) $(H_SRC) $(C_SRC)
 tidy[%.c]:
 	$(ECHO_TARGET)
-	$(C_INDENT) $(C_INDENT_FLAGS) $*.c
+	$(C_INDENT_ENV) $(C_INDENT_CMD) $(C_INDENT_FLAGS) $(C_INDENT_FLAGS) $*.c
 tidy[%.h]:
 	$(ECHO_TARGET)
-	$(C_INDENT) $(C_INDENT_FLAGS) $*.h
+	$(C_INDENT_ENV) $(C_INDENT_CMD) $(C_INDENT_FLAGS) $(C_INDENT_FLAGS) $*.h
 
 #
 # lint: --Perform static analysis for C files.
 #
-C_LINT ?= cppcheck --quiet --std=c11 --template=gcc --enable=style,warning,performance,portability,information $(C_CPPFLAGS)
+C_LINT_CMD ?= cppcheck
+C_LINT_CMD_FLAGS ?= --quiet --std=c11 --template=gcc --enable=style,warning,performance,portability,information $(C_CPPFLAGS)
 C_LINT_FLAGS = $(OS.C_LINT_FLAGS) $(ARCH.C_LINT_FLAGS) \
     $(PROJECT.C_LINT_FLAGS) $(LOCAL.C_LINT_FLAGS) $(TARGET.C_LINT_FLAGS)
 lint:	lint-c
 lint-c: c-src-defined
 	$(ECHO_TARGET)
-	$(C_LINT) $(C_LINT_FLAGS) $(H_SRC) $(C_SRC)
+	$(C_LINT_CMD) $(CLINT_CMD_FLAGS) $(C_LINT_FLAGS) $(H_SRC) $(C_SRC)
 lint[%.c]:
 	$(ECHO_TARGET)
-	$(C_LINT) $(C_LINT_FLAGS) $*.c
+	$(C_LINT_CMD) $(CLINT_CMD_FLAGS) $(C_LINT_FLAGS) $*.c
 lint[%.h]:
 	$(ECHO_TARGET)
 	$(C_LINT) $(C_LINT_FLAGS) $*.h
@@ -263,10 +272,10 @@ toc[%.h]:
 src:	src-c
 src-c:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn C_SRC *.c
-	@mk-filelist -f $(MAKEFILE) -qn C_MAIN_SRC \
+	$(Q)mk-filelist -f $(MAKEFILE) -qn C_SRC *.c
+	$(Q)mk-filelist -f $(MAKEFILE) -qn C_MAIN_SRC \
             $$(grep -l $(C_MAIN_RGX) *.c 2>/dev/null)
-	@mk-filelist -f $(MAKEFILE) -qn H_SRC *.h
+	$(Q)mk-filelist -f $(MAKEFILE) -qn H_SRC *.h
 
 #
 # tags: --Build vi, emacs tags files.
@@ -282,4 +291,10 @@ tags-c:	c-src-defined
 todo:	todo-c
 todo-c:
 	$(ECHO_TARGET)
-	@$(GREP) $(TODO_PATTERN) $(H_SRC) $(C_SRC) /dev/null || true
+	@$(GREP) $(TODO_PATTERN) $(H_SRC) $(C_SRC) /dev/null ||:
+
+#
+# +version: --Report details of tools used by C.
+#
++version: cmd-version[$(CC)] cmd-version[$(C_INDENT_CMD)] \
+    cmd-version[$(C_LINT_CMD)]

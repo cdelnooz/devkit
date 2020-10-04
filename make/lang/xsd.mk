@@ -7,6 +7,7 @@
 # uninstall-xsd: --Remove XSD files and related include files.
 # clean:         --Remove XSD's generated and object files.
 # src:           --Update the XSD_SRC target.
+# +version:      --Report details of tools used by XSD
 #
 # Remarks:
 # The XSD module adds some rules for building C++ marshalling routines
@@ -15,9 +16,14 @@
 #
 # REVISIT: XmlSchema.h behaviour is broken: install triggers build!
 #
+# See Also:
+# https://www.codesynthesis.com/projects/xsd
+#
 .PHONY: $(recursive-targets:%=%-xsd)
 
 #-include $(XSD_SRC:%.xsd=$(archdir)/%-depend.mk)
+
+PRINT_xsd_VERSION = xsd version
 
 ifdef autosrc
     LOCAL_XSD_SRC := $(wildcard *.xsd)
@@ -71,7 +77,7 @@ install-xsd: $(XSD_SRC:%=$(xsddir)/%)
 uninstall-xsd:	uninstall-xsd-xsd uninstall-xsd-include
 	$(ECHO_TARGET)
 	$(RM) $(XSD_SRC:%=$(xsddir)/%)
-	$(RMDIR) -p $(xsddir) 2>/dev/null || true
+	$(RMDIR) -p $(xsddir) 2>/dev/null ||:
 
 $(gendir)/$(XML_SCHEMA).$(H++_SUFFIX): | $(gendir)
 	$(ECHO_TARGET)
@@ -93,4 +99,9 @@ clean-xsd:
 src:	src-xsd
 src-xsd:
 	$(ECHO_TARGET)
-	@mk-filelist -f $(MAKEFILE) -qn XSD_SRC *.xsd
+	$(Q)mk-filelist -f $(MAKEFILE) -qn XSD_SRC *.xsd
+
+#
+# +version: --Report details of tools used by XSD
+#
++version: cmd-version[$(XSD)]
