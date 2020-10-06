@@ -23,22 +23,30 @@
 #  * SHL_SRC	--sh library files
 #  * AWK_SRC	--awk scripts
 #  * SED_SRC	--sed scripts
+#  * INS_SRC    --install-only sources (i.e. already executable scripts)
 #
 # It defines rules for building and installing, and for installing
 # library files into a shell-specific library directory $(shlibdir).
 # The target `install-sh` will install scripts into $(bindir).
 #
+FIND ?= find
+define find_executables
+$(FIND) . -maxdepth 1 -type f -executable -exec basename {} \;
+endef
+
 .PHONY: $(recursive-targets:%=%-sh)
 ifdef autosrc
     LOCAL_SH_SRC  := $(wildcard *.sh)
     LOCAL_SHL_SRC := $(wildcard *.shl)
     LOCAL_AWK_SRC := $(wildcard *.awk)
     LOCAL_SED_SRC := $(wildcard *.sed)
+    LOCAL_INS_SRC := $$($(find_executables))
 
     SH_SRC	?= $(LOCAL_SH_SRC)
     SHL_SRC	?= $(LOCAL_SHL_SRC)
     AWK_SRC	?= $(LOCAL_AWK_SRC)
     SED_SRC	?= $(LOCAL_SED_SRC)
+    INS_SRC	?= $(LOCAL_INS_SRC)
 endif
 
 shlibdir	:= $(exec_prefix)/lib/sh/$(subdir)
@@ -87,7 +95,8 @@ build[%.sed]:	$*
 # install-sh: --install shell scripts to bindir, libraries to shlibdir
 #
 install-sh:	$(SH_SRC:%.sh=$(bindir)/%) $(SHL_SRC:%=$(shlibdir)/%) \
-    $(SED_SRC:%.sed=$(bindir)/%) $(AWK_SRC:%.awk=$(bindir)/%)
+    $(SED_SRC:%.sed=$(bindir)/%) $(AWK_SRC:%.awk=$(bindir)/%) \
+    $(INS_SRC:%=$(bindir)/%)
 	$(ECHO_TARGET)
 
 #
@@ -96,7 +105,8 @@ install-sh:	$(SH_SRC:%.sh=$(bindir)/%) $(SHL_SRC:%=$(shlibdir)/%) \
 uninstall-sh:
 	$(ECHO_TARGET)
 	$(RM) $(SH_SRC:%.sh=$(bindir)/%) $(SHL_SRC:%=$(shlibdir)/%) \
-            $(SED_SRC:%.sed=$(bindir)/%) $(AWK_SRC:%.awk=$(bindir)/%)
+            $(SED_SRC:%.sed=$(bindir)/%) $(AWK_SRC:%.awk=$(bindir)/%) \
+	    $(INS_SRC:%=$(bindir)/%)
 	$(RMDIR) -p $(bindir) $(shlibdir) 2>/dev/null ||:
 
 #
@@ -125,6 +135,7 @@ src-sh:
 	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn SHL_SRC *.shl
 	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn AWK_SRC *.awk
 	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn SED_SRC *.sed
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn INS_SRC $$($(find_executables))
 
 #
 # todo: --Report unfinished work in shell, awk, sed code.

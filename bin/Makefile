@@ -3,9 +3,9 @@
 #
 language = sh
 
-SH_SRC = echo+.sh mk-ar-merge.sh mk-ar.sh mk-deb-buildarch.sh \
-    mk-filelist.sh mk-help.sh mk-install.sh mk-rpm-buildarch.sh \
-    mk-rpm-files.sh mk-toc.sh remake.sh
+INS_SRC = echo+ mk-ar mk-ar-merge mk-deb-buildarch mk-filelist \
+    mk-help mk-install mk-rpm-buildarch mk-rpm-files mk-toc \
+    remake
 
 include makeshift.mk
 

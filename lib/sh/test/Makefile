@@ -2,8 +2,7 @@
 # Makefile --build rules for tap's test directory
 #
 language = sh
-SH_SRC = tap-api.sh tap-process.sh tap-protocol.sh
-TAP_TESTS = $(SH_SRC:%.sh=%)
+INS_SRC = tap-api tap-process tap-protocol
 LOCAL.SH_LINT_FLAGS = -e SC2034
 
 include makeshift.mk test/tap.mk
