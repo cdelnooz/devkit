@@ -9,3 +9,4 @@ MK-RPM-BUILDARCH = $(MAKESHIFT_BIN)/mk-rpm-buildarch
 MK-RPM-FILES = $(MAKESHIFT_BIN)/mk-rpm-files
 MK-TOC = $(MAKESHIFT_BIN)/mk-toc
 REMAKE = $(MAKESHIFT_BIN)/remake
+MDDEPS = $(MAKESHIFT_BIN)/mddeps
