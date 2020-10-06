@@ -55,7 +55,7 @@ $(man8dir)/%.8:	%.8;	$(INSTALL_DATA) $? $@
 toc:	toc-nroff
 toc-nroff:
 	$(ECHO_TARGET)
-	mk-toc $(MAN1_SRC) $(MAN3_SRC) $(MAN5_SRC) $(MAN7_SRC) $(MAN8_SRC)
+	$(MK-TOC) $(MAN1_SRC) $(MAN3_SRC) $(MAN5_SRC) $(MAN7_SRC) $(MAN8_SRC)
 
 #
 # src-nroff: --specific-nroff customisations for the "src" target.
@@ -67,11 +67,11 @@ toc-nroff:
 src:	src-nroff
 src-nroff:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN1_SRC *.1
-	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN3_SRC *.3
-	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN5_SRC *.5
-	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN7_SRC *.7
-	$(Q)mk-filelist -f $(MAKEFILE) -qn MAN8_SRC *.8
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn MAN1_SRC *.1
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn MAN3_SRC *.3
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn MAN5_SRC *.5
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn MAN7_SRC *.7
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn MAN8_SRC *.8
 
 doc:	$(MAN1_SRC:%.1=%.1.pdf) $(MAN3_SRC:%.3=%.3.pdf) \
 	$(MAN5_SRC:%.5=%.5.pdf) $(MAN7_SRC:%.7=%.7.pdf) \

@@ -89,16 +89,16 @@ uninstall-system_conf:
 toc:	toc-conf
 toc-conf:	conf-src-defined
 	$(ECHO_TARGET)
-	mk-toc $(CONF_SRC) $(CFG_SRC) $(INI_SRC)
+	$(MK-TOC) $(CONF_SRC) $(CFG_SRC) $(INI_SRC)
 toc[%.conf]:
 	$(ECHO_TARGET)
-	mk-toc $*.conf
+	$(MK-TOC) $*.conf
 toc[%.cfg]:
 	$(ECHO_TARGET)
-	mk-toc $*.cfg
+	$(MK-TOC) $*.cfg
 toc[%.ini]:
 	$(ECHO_TARGET)
-	mk-toc $*.ini
+	$(MK-TOC) $*.ini
 
 #
 # src: --Update definitions of CONF_SRC, CFG_SRC, INI_SRC.
@@ -106,9 +106,9 @@ toc[%.ini]:
 src:	src-conf
 src-conf:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn CONF_SRC *.conf
-	$(Q)mk-filelist -f $(MAKEFILE) -qn CFG_SRC *.cfg
-	$(Q)mk-filelist -f $(MAKEFILE) -qn INI_SRC *.ini
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn CONF_SRC *.conf
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn CFG_SRC *.cfg
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn INI_SRC *.ini
 
 #
 # todo: --Report "unfinished work" comments in config files.

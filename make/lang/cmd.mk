@@ -57,7 +57,7 @@ uninstall-cmd:
 # toc:	toc-cmd
 # toc-cmd:
 # 	$(ECHO_TARGET)
-# 	mk-toc $(CMD_SRC) $(BAT_SRC) $(BTM_SRC)
+# 	$(MK-TOC) $(CMD_SRC) $(BAT_SRC) $(BTM_SRC)
 
 #
 # src: --Define CMD_SRC, BAT_SRC, BTM_SRC.
@@ -65,9 +65,9 @@ uninstall-cmd:
 src:	src-cmd
 src-cmd:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn CMD_SRC *.cmd
-	$(Q)mk-filelist -f $(MAKEFILE) -qn BAT_SRC *.bat
-	$(Q)mk-filelist -f $(MAKEFILE) -qn BTM_SRC *.btm
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn CMD_SRC *.cmd
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn BAT_SRC *.bat
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn BTM_SRC *.btm
 
 #
 # todo: --Report unfinished work in cmd code.

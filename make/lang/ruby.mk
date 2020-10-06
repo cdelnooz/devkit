@@ -60,7 +60,7 @@ clean-ruby:
 toc:	toc-ruby
 toc-ruby:
 	$(ECHO_TARGET)
-	mk-toc $(RB_SRC)
+	$(MK-TOC) $(RB_SRC)
 
 #
 # src: --Define RB_SRC.
@@ -68,7 +68,7 @@ toc-ruby:
 src:	src-ruby
 src-ruby:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn RB_SRC *.rb
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn RB_SRC *.rb
 #
 # todo: --Report unfinished work in ruby files.
 #

@@ -65,9 +65,9 @@ uninstall-css:
 src:	src-css
 src-css:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn CSS_SRC *.css
-	$(Q)mk-filelist -f $(MAKEFILE) -qn SCSS_SRC *.scss
-	$(Q)mk-filelist -f $(MAKEFILE) -qn LESS_SRC *.less
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn CSS_SRC *.css
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn SCSS_SRC *.scss
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn LESS_SRC *.less
 
 #
 # toc: --Build the table-of-contents for CSS files.
@@ -75,16 +75,16 @@ src-css:
 toc:	toc-css
 toc-css:	css-src-defined
 	$(ECHO_TARGET)
-	mk-toc $(CSS_SRC) $(SCSS_SRC) $(LESS_SRC)
+	$(MK-TOC) $(CSS_SRC) $(SCSS_SRC) $(LESS_SRC)
 toc[%.css]:
 	$(ECHO_TARGET)
-	mk-toc $*.css
+	$(MK-TOC) $*.css
 toc[%.scss]:
 	$(ECHO_TARGET)
-	mk-toc $*.sccs
+	$(MK-TOC) $*.sccs
 toc[%.less]:
 	$(ECHO_TARGET)
-	mk-toc $*.less
+	$(MK-TOC) $*.less
 
 #
 # todo: --Report "unfinished work" comments in CSS files.

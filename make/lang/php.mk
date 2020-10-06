@@ -41,7 +41,7 @@ uninstall-www-php:
 toc:	toc-php
 toc-php:
 	$(ECHO_TARGET)
-	mk-toc $(PHP_SRC)
+	$(MK-TOC) $(PHP_SRC)
 
 #
 # src: --Define the PHP_SRC macro.
@@ -49,7 +49,7 @@ toc-php:
 src:	src-php
 src-php:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn PHP_SRC *.php
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn PHP_SRC *.php
 
 #
 # todo: --Report unfinished work in PHP source code.

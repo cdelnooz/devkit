@@ -136,8 +136,8 @@ clean-markdown:
 src:	src-markdown
 src-markdown:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn MMD_SRC *.mmd
-	$(Q)mk-filelist -f $(MAKEFILE) -qn MD_SRC *.md
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn MMD_SRC *.mmd
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn MD_SRC *.md
 
 #
 # todo-markdown: --Report unfinished work in markdown files.

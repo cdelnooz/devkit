@@ -43,7 +43,7 @@ src:	src-xsl
 .PHONY:	src-xsl
 src-xsl:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn XSL_SRC *.xsl
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn XSL_SRC *.xsl
 
 #
 # todo: --Report unfinished work in XSL files.

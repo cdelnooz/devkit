@@ -17,7 +17,7 @@
 # There are many ways to build a debian package, and this is
 # just one more to add to the confusion.
 #
-DEB_ARCH ?= $(shell mk-deb-buildarch debian/control)
+DEB_ARCH ?= $(shell $(MK-DEB-BUILDARCH) debian/control)
 DEB_ARCH := $(DEB_ARCH)
 
 V.B_A	= $(VERSION)$(BUILD:%=.%)$(DEB_ARCH:%=_%)
@@ -36,7 +36,7 @@ package-deb:	 $(P_V.B_A).deb | control-ok
 
 $(P_V.B_A).deb:	debian-binary control.tar.gz data.tar.gz
 	$(ECHO_TARGET)
-	$(FAKEROOT) mk-ar debian-binary control.tar.gz data.tar.gz >$@
+	$(FAKEROOT) $(MK-AR) debian-binary control.tar.gz data.tar.gz >$@
 
 #
 # debian-binary: --Create the "debian-binary" file automatically.

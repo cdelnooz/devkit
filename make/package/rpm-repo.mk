@@ -55,4 +55,4 @@ clean-rpm-repo:
 src:	src-rpm-repo
 src-rpm-repo:
 	$(ECHO_TARGET)
-	cd SPECS && mk-filelist -f../Makefile -qn SPEC_SRC *.spec
+	cd SPECS && $(MK-FILELIST) -f../Makefile -qn SPEC_SRC *.spec

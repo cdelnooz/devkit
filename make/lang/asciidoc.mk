@@ -98,7 +98,7 @@ uninstall-asciidoc:
 src:	src-asciidoc
 src-asciidoc:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn TXT_SRC *.txt
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn TXT_SRC *.txt
 
 #
 # clean: --cleanup asciidoc intermediate files (.xml, .fo, .pdf).
