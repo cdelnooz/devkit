@@ -77,16 +77,8 @@ Alternative to installing, **makeshift** also works in-situ. This may
 be useful for example when running different versions of **makeshift**
 or when including **makeshift** as a sub-module in your project. To
 use **makeshift** this way, you have to set `MAKESHIFT_HOME` to the
-location where **makeshift** has been cloned and then build **makeshift**:
-
-```shell
-$ export MAKESHIFT_HOME=/my/makeshift/location
-$ cd $MAKESHIFT_HOME
-$ make -I$MAKESHIFT_HOME/make
-```
-
-Provided you have `MAKESHIFT_HOME` defined, your projects can now use
-**makeshift** as:
+location where **makeshift** has been cloned. Provided you have 
+`MAKESHIFT_HOME` defined, your projects can now use **makeshift** as:
 
 ```shell
 $ make -I$MAKESHIFT_HOME/make
