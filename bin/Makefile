@@ -3,7 +3,7 @@
 #
 language = sh
 
-INS_SRC = echo+ mk-ar mk-ar-merge mk-deb-buildarch mk-filelist \
+INS_SRC = echo+ mddeps mk-ar mk-ar-merge mk-deb-buildarch mk-filelist \
     mk-help mk-install mk-rpm-buildarch mk-rpm-files mk-toc \
     remake
 

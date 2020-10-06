@@ -1,0 +1,79 @@
+#!/bin/sh
+#
+# MDDEPS --generate a dependecy file from a .md document
+#
+# Remarks:
+# This script generates a file containing the dependencies of a
+# markdown document. Dependencies are defined as all images that are
+# included as ![...](<image>) and any other files that are directly
+# included using the include-files lua filter. These are in fenced
+# code blocks ```{.include}<file>...```
+
+target=
+verbose=
+debug=
+
+usage()
+{
+    cat <<EOF
+mddeps --generate a list of dependencies in Makefile compatible syntax
+         output is generated to stdout; typical usage redirects to a
+         .d file
+
+Usage:
+    mddeps [options] markdown-file
+
+Options:
+    -t <file>    define the target of the make rule generated
+    -h           display this help text
+    -v           verbose output
+    -_           debug output
+EOF
+}
+
+log_message() {	printf "mddeps: ";	printf "$@"; printf "\n"; } >&2
+notice()      { log_message "$@"; }
+info()        { if [ "$verbose" -o "$debug" ]; then log_message "$@"; fi; }
+debug()       { if [ "$debug" ]; then log_message "$@"; fi; }
+error()       { notice "$@"; usage >&2; exit 2;}
+
+while getopts "t:hv_" c
+do
+    case $c in
+	t)  target="$OPTARG";;
+	v)  verbose=1 debug=;;
+	q)  verbose=  debug=;;
+	_)  verbose=1 debug=1;;
+	h|\?)  usage >&2
+	       exit 2;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+if [ -z "${target}" ]; then error "no target specified"; fi
+
+if [ -z "$1" ]; then error "no markdown-file specified"; fi
+
+if [ ! -f "$1" ]; then error 'file %s does not exist' "$1"; fi
+
+main()
+{
+    input=$1
+    debug 'input=%s' "$1"
+    deps=$(sed -n -e 's/[ \t]*\!\[.*\](\(.*\)).*/\1/p' \
+	       -e '/```{.include}/,/```/{/```{.include}/!{/```/!p;};}' \
+	       ${input})
+    debug 'deps=%s' "${deps}"
+    echo "${target}: ${input} \\"
+    for dep in ${deps}; do
+	echo "\t ${dep} \\"
+    done
+    echo "\n"
+    # create empty targets to avoid Make errors when files no longer exist
+    for dep in ${deps}; do
+	echo "${dep}: \n\n"
+    done
+}
+
+
+main "$@"
