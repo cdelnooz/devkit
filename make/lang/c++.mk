@@ -247,13 +247,13 @@ lint[%.$(H++_SUFFIX)]:
 toc:	toc-c++
 toc-c++:	c++-src-defined
 	$(ECHO_TARGET)
-	mk-toc $(H++_SRC) $(C++_SRC)
+	$(MK-TOC) $(H++_SRC) $(C++_SRC)
 toc[%.$(C++_SUFFIX)]:
 	$(ECHO_TARGET)
-	mk-toc $*.$(C++_SUFFIX)
+	$(MK-TOC) $*.$(C++_SUFFIX)
 toc[%.$(H++_SUFFIX)]:
 	$(ECHO_TARGET)
-	mk-toc $*.$(H++_SUFFIX)
+	$(MK-TOC) $*.$(H++_SUFFIX)
 
 #
 # src: --Update the C++_SRC, H++_SRC, C++_MAIN_SRC macros.
@@ -261,10 +261,10 @@ toc[%.$(H++_SUFFIX)]:
 src:	src-c++
 src-c++:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn C++_SRC *.$(C++_SUFFIX)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn C++_MAIN_SRC \
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn C++_SRC *.$(C++_SUFFIX)
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn C++_MAIN_SRC \
             $$(grep -l $(C++_MAIN_RGX) *.$(C++_SUFFIX) 2>/dev/null)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn H++_SRC *.$(H++_SUFFIX)
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn H++_SRC *.$(H++_SUFFIX)
 
 #
 # tags: --Build vi, emacs tags files for C++ files.

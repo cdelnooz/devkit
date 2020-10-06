@@ -114,17 +114,17 @@ distclean:	clean-sh
 toc:	toc-sh
 toc-sh:
 	$(ECHO_TARGET)
-	mk-toc $(SH_SRC) $(SHL_SRC) $(AWK_SRC) $(SED_SRC)
+	$(MK-TOC) $(SH_SRC) $(SHL_SRC) $(AWK_SRC) $(SED_SRC)
 #
 # src: --Define SH_SRC, SHL_SRC, AWK_SRC, SED_SRC.
 #
 src:	src-sh
 src-sh:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn SH_SRC *.sh
-	$(Q)mk-filelist -f $(MAKEFILE) -qn SHL_SRC *.shl
-	$(Q)mk-filelist -f $(MAKEFILE) -qn AWK_SRC *.awk
-	$(Q)mk-filelist -f $(MAKEFILE) -qn SED_SRC *.sed
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn SH_SRC *.sh
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn SHL_SRC *.shl
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn AWK_SRC *.awk
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn SED_SRC *.sed
 
 #
 # todo: --Report unfinished work in shell, awk, sed code.

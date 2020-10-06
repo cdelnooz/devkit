@@ -49,7 +49,9 @@ space := $(nullstring) # end of the line
 comma := ,
 MAKEFILE := $(firstword $(MAKEFILE_LIST))
 MAKESHIFT_HOME ?= /usr/local
+MAKESHIFT_BIN = $(MAKESHIFT_HOME)/bin
 -include makeshift-version.mk
+include makeshift-tools.mk
 
 VERSION ?= local
 BUILD ?= latest
@@ -201,7 +203,7 @@ distclean-makeshift:
 # +help: --Output some help text extracted from the included makefiles.
 #
 .PHONY: +help +features +dirs +files +version +env
-+help:			;	@mk-help $(MAKEFILE_LIST)
++help:			;	@$(MK-HELP) $(MAKEFILE_LIST)
 +features:		;	@echo $(.FEATURES)
 +dirs:			;	@echo $(.INCLUDE_DIRS)
 +files:			;	@echo $(MAKEFILE_LIST)

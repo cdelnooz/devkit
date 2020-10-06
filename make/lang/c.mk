@@ -258,13 +258,13 @@ lint[%.h]:
 toc:	toc-c
 toc-c:	c-src-defined
 	$(ECHO_TARGET)
-	mk-toc $(H_SRC) $(C_SRC)
+	$(MK-TOC) $(H_SRC) $(C_SRC)
 toc[%.c]:
 	$(ECHO_TARGET)
-	mk-toc $*.c
+	$(MK-TOC) $*.c
 toc[%.h]:
 	$(ECHO_TARGET)
-	mk-toc $*.h
+	$(MK-TOC) $*.h
 
 #
 # src: --Update the C_SRC, H_SRC, C_MAIN_SRC macros.
@@ -272,10 +272,10 @@ toc[%.h]:
 src:	src-c
 src-c:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn C_SRC *.c
-	$(Q)mk-filelist -f $(MAKEFILE) -qn C_MAIN_SRC \
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn C_SRC *.c
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn C_MAIN_SRC \
             $$(grep -l $(C_MAIN_RGX) *.c 2>/dev/null)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn H_SRC *.h
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn H_SRC *.h
 
 #
 # tags: --Build vi, emacs tags files.

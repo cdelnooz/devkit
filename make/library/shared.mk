@@ -63,7 +63,7 @@ uninstall-lib-lib:	uninstall-lib-include
 #
 $(archdir)/lib.$(s.a): $(SUBLIB_SRC:%.$(a)=%.$(s.a))
 	$(ECHO_TARGET)
-	mk-ar-merge $(ARFLAGS) $@ $^
+	$(MK-AR-MERGE) $(ARFLAGS) $@ $^
 	$(RANLIB) $@
 
 #

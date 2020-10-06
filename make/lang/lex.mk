@@ -69,7 +69,7 @@ clean-lex:
 src:	src-lex
 src-lex:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn LEX_SRC *.l
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn LEX_SRC *.l
 
 #
 # toc: --Update the table of contents in lex files.
@@ -77,7 +77,7 @@ src-lex:
 toc:	toc-lex
 toc-lex:
 	$(ECHO_TARGET)
-	mk-toc $(LEX_SRC)
+	$(MK-TOC) $(LEX_SRC)
 #
 # +version: --Report details of tools used by lex.
 #

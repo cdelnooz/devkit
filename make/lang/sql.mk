@@ -38,7 +38,7 @@ uninstall-sql:
 toc:	toc-sql
 toc-sql:
 	$(ECHO_TARGET)
-	mk-toc $(SQL_SRC)
+	$(MK-TOC) $(SQL_SRC)
 
 #
 # src: --Update the SQL_SRC macro.
@@ -46,7 +46,7 @@ toc-sql:
 src:	src-sql
 src-sql:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn SQL_SRC *.sql
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn SQL_SRC *.sql
 
 #
 # todo: --Report unfinished work in work SQL files.

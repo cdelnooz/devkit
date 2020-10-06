@@ -83,7 +83,7 @@ clean-python:
 toc:	toc-python
 toc-python:	var-defined[PY_SRC]
 	$(ECHO_TARGET)
-	mk-toc $(PY_SRC)
+	$(MK-TOC) $(PY_SRC)
 
 #
 # src: --define the PY_SRC variable.
@@ -91,7 +91,7 @@ toc-python:	var-defined[PY_SRC]
 src:	src-python
 src-python:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn PY_SRC *.py
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn PY_SRC *.py
 #
 # todo: --Report unfinished work (identified by keyword comments)
 #

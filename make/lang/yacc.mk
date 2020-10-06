@@ -83,7 +83,7 @@ clean-yacc:
 src:	src-yacc
 src-yacc:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn YACC_SRC *.y
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn YACC_SRC *.y
 
 #
 # toc: --Update the YACC_SRC macro with a list of yacc grammars.
@@ -91,7 +91,7 @@ src-yacc:
 toc:	toc-yacc
 toc-yacc:
 	$(ECHO_TARGET)
-	mk-toc $(YACC_SRC)
+	$(MK-TOC) $(YACC_SRC)
 
 #
 # +version: --Report details of tools used by yacc.

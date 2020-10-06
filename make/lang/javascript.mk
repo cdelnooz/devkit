@@ -36,14 +36,14 @@ uninstall-javascript:
 toc:	toc-javascript
 toc-javascript:
 	$(ECHO_TARGET)
-	mk-toc $(JS_SRC)
+	$(MK-TOC) $(JS_SRC)
 #
 # src-javascript: --Update the JS_SRC macro.
 #
 src:	src-javascript
 src-javascript:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn JS_SRC *.js
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn JS_SRC *.js
 
 #
 # todo: --Report "unfinished work" comments in JavaScript files.

@@ -16,8 +16,17 @@ for building software recursively. It:
  * can package the project as a RPM or DEB installable package.
  * can build reliably in parallel!
 
-## Installation
-Just want to get started? try this:
+## Getting started
+
+There are two ways to start using **makeshift**:
+
+1. Installation in a configurable location
+2. Use without installation
+
+Both methods are explained in this section.
+
+### Installation
+To install **makeshift**, simply try this:
 
 ```shell
 $ sh install.sh
@@ -42,17 +51,67 @@ the following sub-directories:
  * $prefix/_include_ --**make** rules and targets
  * $prefix/_lib/sh_ --**shell** library code
 
-### Uninstallation
+When installing in a custom location, make sure to set the variable
+`MAKESHIFT_HOME` to the prefix you have chosen. Otherwise, **makeshift**
+will not be able to find its files. You will also have to provide the
+`include` directory of the prefix in the make invocation:
+
+```shell
+$ make -I$MAKESHIFT_HOME/include
+```
+
+#### Uninstallation
 
 **Makeshift** supports the (GNU **make** documented) `uninstall` target.  To
 remove makeshift from your system:
 
 ```shell
-$ make uninstall
+$ make -I$(pwd)/make uninstall
 ```
 
 This target will remove all installed files, and any directories made
 empty thereby.
+
+### Use in-situ
+Alternative to installing, **makeshift** also works in-situ. This may
+be useful for example when running different versions of **makeshift**
+or when including **makeshift** as a sub-module in your project. To
+use **makeshift** this way, you have to set `MAKESHIFT_HOME` to the
+location where **makeshift** has been cloned and then build **makeshift**:
+
+```shell
+$ export MAKESHIFT_HOME=/my/makeshift/location
+$ cd $MAKESHIFT_HOME
+$ make -I$MAKESHIFT_HOME/make
+```
+
+Provided you have `MAKESHIFT_HOME` defined, your projects can now use
+**makeshift** as:
+
+```shell
+$ make -I$MAKESHIFT_HOME/make
+```
+
+#### Including project specific files
+Normally, **makeshift** assumes your project specific makefile
+snippets are in `/usr/local/include/project`. To avoid having to
+install them, there is two possibilities:
+
+One, you can install the files in `$MAKESHIFT_HOME/make/project`. This
+way, make will find them. However, if using **makeshift** as a
+sub-module to your project, this is not very convenient.
+
+The second way of doing this, is to define another environment
+variable that points to the root of your project, and then store the
+makefiles in `$PROJECT_ROOT/mk/project`. You can then run as follows:
+
+```shell
+$ export PROJECT_ROOT=/path/to/project
+$ PROJECT=myproject make -I$MAKESHIFT_HOME/make -I$PROJECT_ROOT/mk
+```
+
+As construction the commandline every single build is cumbersome,
+consider wraping it in a script or alias.
 
 ## Usage
 

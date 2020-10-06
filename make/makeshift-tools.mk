@@ -1,0 +1,11 @@
+ECHO+ = $(MAKESHIFT_BIN)/echo+
+MK-AR-MERGE = $(MAKESHIFT_BIN)/mk-ar-merge
+MK-AR = $(MAKESHIFT_BIN)/mk-ar
+MK-DEB-BUILDARCH = $(MAKESHIFT_BIN)/mk-deb-buildarch
+MK-FILELIST = $(MAKESHIFT_BIN)/mk-filelist
+MK-HELP = $(MAKESHIFT_BIN)/mk-help
+MK-INSTALL = $(MAKESHIFT_BIN)/mk-install
+MK-RPM-BUILDARCH = $(MAKESHIFT_BIN)/mk-rpm-buildarch
+MK-RPM-FILES = $(MAKESHIFT_BIN)/mk-rpm-files
+MK-TOC = $(MAKESHIFT_BIN)/mk-toc
+REMAKE = $(MAKESHIFT_BIN)/remake

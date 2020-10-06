@@ -30,7 +30,7 @@
 # See Also:
 # https://fedoraproject.org/wiki/How_to_create_an_RPM_package
 #
-RPM_ARCH ?= $(shell mk-rpm-buildarch)
+RPM_ARCH ?= $(shell $(MK-RPM-BUILDARCH))
 RPM_ARCH := $(RPM_ARCH)
 
 PRINT_rpmbuild_VERSION = rpmbuild --version
@@ -120,7 +120,7 @@ srpm:	SOURCES/$(P-V).tar.gz SPECS/$(PACKAGE).spec
 %-rpm-files.txt:	$(DESTDIR_ROOT)
 	$(ECHO_TARGET)
 	find $(DESTDIR_ROOT) -not -type d | \
-            sed -e 's|^$(DESTDIR_ROOT)||' | mk-rpm-files >$@
+            sed -e 's|^$(DESTDIR_ROOT)||' | $(MK-RPM-FILES) >$@
 
 clean:	clean-rpm
 distclean:	clean-rpm distclean-rpm

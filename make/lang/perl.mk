@@ -82,7 +82,7 @@ tidy-perl:
 toc:	toc-perl
 toc-perl:
 	$(ECHO_TARGET)
-	mk-toc $(PERL_SRC)
+	$(MK-TOC) $(PERL_SRC)
 
 #
 # src: --Define PL_SRC, PM_SRC, T_SRC.
@@ -90,9 +90,9 @@ toc-perl:
 src:	src-perl
 src-perl:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn PL_SRC *.pl
-	$(Q)mk-filelist -f $(MAKEFILE) -qn PM_SRC *.pm
-	$(Q)mk-filelist -f $(MAKEFILE) -qn T_SRC *.t
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn PL_SRC *.pl
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn PM_SRC *.pm
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn T_SRC *.t
 
 #
 # todo: --Report unfinished work (identified by keyword comments)

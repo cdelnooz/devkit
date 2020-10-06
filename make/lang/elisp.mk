@@ -71,7 +71,7 @@ clean-elisp:
 toc:	toc-elisp
 toc-elisp:	var-defined[ELISP_SRC]
 	$(ECHO_TARGET)
-	mk-toc $(ELISP_SRC)
+	$(MK-TOC) $(ELISP_SRC)
 
 #
 # src: --Update the ELISP_SRC macro with a list of ".el" files.
@@ -79,7 +79,7 @@ toc-elisp:	var-defined[ELISP_SRC]
 src:	src-elisp
 src-elisp:
 	$(ECHO_TARGET)
-	$(Q)mk-filelist -f $(MAKEFILE) -qn ELISP_SRC *.el
+	$(Q)$(MK-FILELIST) -f $(MAKEFILE) -qn ELISP_SRC *.el
 
 #
 # todo: --Report "unfinished work" comments in elisp files.
