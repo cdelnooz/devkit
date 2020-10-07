@@ -25,6 +25,7 @@ Usage:
 
 Options:
     -t <file>    define the target of the make rule generated
+    -r <path>    path to prepend includes with
     -h           display this help text
     -v           verbose output
     -_           debug output
@@ -37,10 +38,11 @@ info()        { if [ "$verbose" -o "$debug" ]; then log_message "$@"; fi; }
 debug()       { if [ "$debug" ]; then log_message "$@"; fi; }
 error()       { notice "$@"; usage >&2; exit 2;}
 
-while getopts "t:hv_" c
+while getopts "t:r:hv_" c
 do
     case $c in
 	t)  target="$OPTARG";;
+	r)  inc_root="$OPTARG";;
 	v)  verbose=1 debug=;;
 	q)  verbose=  debug=;;
 	_)  verbose=1 debug=1;;
@@ -60,18 +62,24 @@ main()
 {
     input=$1
     debug 'input=%s' "$1"
-    deps=$(sed -n -e 's/[ \t]*\!\[.*\](\(.*\)).*/\1/p' \
-	       -e '/```{.include}/,/```/{/```{.include}/!{/```/!p;};}' \
+    images=$(sed -n -e 's/[ \t]*\!\[.*\](\(.*\)).*/\1/p' ${input})
+    includes=$(sed -n -e '/```{.include}/,/```/{/```{.include}/!{/```/!p;};}' \
 	       ${input})
-    debug 'deps=%s' "${deps}"
+    debug 'deps=%s' "${images} ${includes}"
     echo "${target}: ${input} \\"
-    for dep in ${deps}; do
+    for dep in ${images}; do
 	echo "\t ${dep} \\"
+    done
+    for dep in ${includes}; do
+	echo "\t ${inc_root}${dep} \\"
     done
     echo "\n"
     # create empty targets to avoid Make errors when files no longer exist
-    for dep in ${deps}; do
+    for dep in ${images}; do
 	echo "${dep}: \n\n"
+    done
+    for dep in ${includes}; do
+	echo "${inc_root}${dep}: \n\n"
     done
 }
 

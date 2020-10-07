@@ -39,12 +39,14 @@ ALL_MDFLAGS ?= -f markdown+raw_attribute \
     $(OS.MDFLAGS) $(ARCH.MDFLAGS) $(PROJECT.MDFLAGS) \
     $(LOCAL.MDFLAGS) $(TARGET.MDFLAGS) $(MDFLAGS)
 
+ALL_MDDEPSFLAGS ?= $(PROJECT.MDDEPSFLAGS) $(LOCAL.MDDEPSFLAGS)
+
 #
 # $(archdir)/%.pdf:%.md --build a PDF document from a markdown file.
 #
 $(archdir)/%.pdf: %.md $(gendir)/%.d | $(archdir) $(gendir)
 	$(ECHO_TARGET)
-	$(Q)$(MDDEPS) -t "$@" "$<" > $(gendir)/$*.d
+	$(Q)$(MDDEPS) -t "$@" $(ALL_MDDEPSFLAGS) "$<" > $(gendir)/$*.d
 	$(MD) $(ALL_MDFLAGS) --pdf-engine=$(MD_PDF) -o $@ $<
 
 DEPFILES = $(MD_SRC:%.md=$(gendir)/%.d)
@@ -57,7 +59,7 @@ include $(wildcard $(DEPFILES))
 #
 $(archdir)/%.tex: %.md | $(archdir)
 	$(ECHO_TARGET)
-	$(Q)$(MDDEPS) -t "$@" "$<" > $(gendir)/$*.d
+	$(Q)$(MDDEPS) -t "$@" $(ALL_MDDEPSFLAGS) "$<" > $(gendir)/$*.d
 	$(MD) $(ALL_MDFLAGS) -t latex -o $@ $<
 
 #
