@@ -49,6 +49,8 @@ $(archdir)/%.pdf: %.md $(gendir)/%.d | $(archdir) $(gendir)
 	$(Q)$(MDDEPS) -t "$@" $(ALL_MDDEPSFLAGS) "$<" > $(gendir)/$*.d
 	$(MD) $(ALL_MDFLAGS) --pdf-engine=$(MD_PDF) -o $@ $<
 
+MD_TRG = $(MD_SRC:%.md=$(archdir)/%.pdf)
+
 DEPFILES = $(MD_SRC:%.md=$(gendir)/%.d)
 $(DEPFILES):
 
@@ -66,7 +68,7 @@ $(archdir)/%.tex: %.md | $(archdir)
 # build: --Create PDF documents from markdown.
 #
 build: build-md
-build-md: $(MD_SRC:%.md=$(archdir)/%.pdf)
+build-md: $(MD_TRG)
 
 
 #
