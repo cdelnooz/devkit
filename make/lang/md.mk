@@ -44,12 +44,12 @@ ALL_MDDEPSFLAGS ?= $(PROJECT.MDDEPSFLAGS) $(LOCAL.MDDEPSFLAGS)
 #
 # $(archdir)/%.pdf:%.md --build a PDF document from a markdown file.
 #
-$(archdir)/%.pdf: %.md $(gendir)/%.d | $(archdir) $(gendir)
+$(archdir)/$(MD_PREFIX)%.pdf: %.md $(gendir)/%.d | $(archdir) $(gendir)
 	$(ECHO_TARGET)
 	$(Q)$(MDDEPS) -t "$@" $(ALL_MDDEPSFLAGS) "$<" > $(gendir)/$*.d
 	$(MD) $(ALL_MDFLAGS) --pdf-engine=$(MD_PDF) -o $@ $<
 
-MD_TRG = $(MD_SRC:%.md=$(archdir)/%.pdf)
+MD_TRG = $(MD_SRC:%.md=$(archdir)/$(MD_PREFIX)%.pdf)
 
 DEPFILES = $(MD_SRC:%.md=$(gendir)/%.d)
 $(DEPFILES):
@@ -59,7 +59,7 @@ include $(wildcard $(DEPFILES))
 #
 # $(archdir)/%.tex:%md --generate a latex document from a markdown file
 #
-$(archdir)/%.tex: %.md | $(archdir)
+$(archdir)/$(MD_PREFIX)%.tex: %.md | $(archdir) $(gendir)
 	$(ECHO_TARGET)
 	$(Q)$(MDDEPS) -t "$@" $(ALL_MDDEPSFLAGS) "$<" > $(gendir)/$*.d
 	$(MD) $(ALL_MDFLAGS) -t latex -o $@ $<
@@ -78,8 +78,7 @@ distclean:	clean-md
 clean:	clean-md
 clean-md:
 	$(ECHO_TARGET)
-	$(RM) $(MD_SRC:%.md=$(archdir)/%.pdf)
-	$(RM) $(DEPFILES)
+	$(RM) $(MD_TRG) $(DEPFILES)
 
 #
 # src-md: --Update MD_SRC, MMD_SRC macros.
