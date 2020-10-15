@@ -35,6 +35,9 @@ MD_PDF ?= lualatex
 PRINT_pandoc_VERSION = $(MD) --version
 PRINT_lualatex_VERSION = $(MD_PDF) --version
 
+# set a configurable install-dir that defaults to $(docdir)
+MD_INSDIR ?= $(docdir)
+
 ALL_MDFLAGS ?= -f markdown+raw_attribute \
     $(OS.MDFLAGS) $(ARCH.MDFLAGS) $(PROJECT.MDFLAGS) \
     $(LOCAL.MDFLAGS) $(TARGET.MDFLAGS) $(MDFLAGS)
@@ -50,6 +53,7 @@ $(archdir)/$(MD_PREFIX)%.pdf: %.md $(gendir)/%.d | $(archdir) $(gendir)
 	$(MD) $(ALL_MDFLAGS) --pdf-engine=$(MD_PDF) -o $@ $<
 
 MD_TRG = $(MD_SRC:%.md=$(archdir)/$(MD_PREFIX)%.pdf)
+MD_INS = $(MD_TRG:$(archdir)/%=$(MD_INSDIR)/%)
 
 DEPFILES = $(MD_SRC:%.md=$(gendir)/%.d)
 $(DEPFILES):
@@ -64,12 +68,37 @@ $(archdir)/$(MD_PREFIX)%.tex: %.md | $(archdir) $(gendir)
 	$(Q)$(MDDEPS) -t "$@" $(ALL_MDDEPSFLAGS) "$<" > $(gendir)/$*.d
 	$(MD) $(ALL_MDFLAGS) -t latex -o $@ $<
 
+
+#
+# install .pdf in the installation dir
+#
+$(MD_INSDIR)/%.pdf: $(archdir)/%.pdf
+	$(INSTALL_DATA) $? $@
+#
+# create MD_INSDIR
+#
+$(MD_INSDIR):
+	$(Q)$(MKDIR) $@
+
 #
 # build: --Create PDF documents from markdown.
 #
 build: build-md
 build-md: $(MD_TRG)
 
+#
+# install: --install all PDF in MD_INSDIR
+#
+install: install-md
+install-md: $(MD_INS) | $(MD_INSDIR)
+
+#
+# uninstall: --remove all PDF from MD_INSDIR
+#
+uninstall: uninstall-md
+uninstall-md:
+	$(RM) $(MD_INS)
+	$(RMDIR) -p $(MD_INSDIR) 2>/dev/null ||:
 
 #
 # clean-md: --Clean up markdown's derived files.
