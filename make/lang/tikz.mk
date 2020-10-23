@@ -31,7 +31,6 @@ TIKZ_LOG = $(TIKZ_PDF:%.pdf=%.log)
 
 $(gendir)/%.pdf: %.tex | $(gendir)
 	$(TEX2PDF) --output-directory=$(gendir) $^ > $(gendir)/$(TEX2PDF).log
-	$(Q)$(RM) $(TIKZ_LOG) $(TIKZ_AUX)
 
 #
 # clean: --Clean TIKZ intermediate files.
