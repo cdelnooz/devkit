@@ -28,7 +28,7 @@ package: $(PACKAGE_DIR)/$(PACKAGE).exe
 	$(file >>$@.args,SetOutputLocation -buildname DefaultBuild -path $(shell cygpath -aw $(PACKAGE_DIR)))
 	$(foreach f,$(filter-out $<,$^),$(file >>$@.args,AddFile APPDIR $(subst /,\,$f)))
 	$(file >>$@.args,$(PRODUCT_MAIN:%=NewShortcut -name % -dir SHORTCUTDIR ) $(PRODUCT_MAIN:%=-target APPDIR\\%.exe -wkdir APPDIR))
-	$(file >>$@.args,$(PRODUCT_MAIN:%=NewShortcut -name % -dir DesktopDir ) $(PRODUCT_MAIN:%=-target APPDIR\\%.exe -wkdir APPDIR))
+	$(file >>$@.args,$(PRODUCT_MAIN:%=NewShortcut -name % -dir DesktopFolder ) $(PRODUCT_MAIN:%=-target APPDIR\\%.exe -wkdir APPDIR))
 	$(file >>$@.args,Save)
 	@$(CP) $< $@
 	$(AIC) /Execute $(subst /,\,$@) $(subst /,\,$@.args)
